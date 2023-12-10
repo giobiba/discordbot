@@ -7,11 +7,19 @@
   "author": "giobiba",
   "license": "MIT",
   "private": true,
+  "lint-staged": {
+    "*.js": "eslint --fix"
+  },
+  "scripts": {
+    "postinstall": "husky install"
+  },
   "dependencies": {
     "discord.js": "^14.14.1"
   },
   "devDependencies": {
     "eslint": "^8.55.0",
-    "eslint-config-google": "^0.14.0"
+    "eslint-config-google": "^0.14.0",
+    "husky": "^8.0.3",
+    "lint-staged": "^15.2.0"
   }
 }
