@@ -1,5 +1,5 @@
 const { SlashCommandBuilder } = require('@discordjs/builders');
-const { getVoiceConnection } = require('@discordjs/voice');
+const { getVoiceConnection, createAudioResource } = require('@discordjs/voice');
 const ytdl = require('ytdl-core');
 
 module.exports = {
@@ -9,16 +9,24 @@ module.exports = {
         .addStringOption(option => option
             .setName('query')
             .setDescription('Name of the song')
-            .setRequired(true)),
+            .setRequired(false)),
     async execute(interaction) {
         const connection = getVoiceConnection(interaction.guild.id);
+        let url = interaction.options.getString('query');
+
+        if (!url) {
+            url = 'https://www.youtube.com/watch?v=BokbpfhV8O8';
+        }
 
         if (!connection) {
             await interaction.reply('Bot is not connected idiot');
             return;
         }
 
-        global.player.play(ytdl('https://www.youtube.com/watch?v=BokbpfhV8O8'));
+        const stream = ytdl(url, { filter : 'audioonly', volume: 0.5 });
+
+        const resource = createAudioResource(stream);
+        global.player.play(resource);
 
         await interaction.reply('playing....');
     },

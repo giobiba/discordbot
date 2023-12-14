@@ -1,5 +1,5 @@
 const { REST, Routes } = require('discord.js');
-const { clientId, guildId, token } = require('./config.json');
+const { clientId, token } = require('./config.json');
 const fs = require('node:fs');
 const path = require('node:path');
 
@@ -32,7 +32,7 @@ const rest = new REST().setToken(token);
 
         // I guess if we want to do testing, we should add a guild id here to only deploy there
         const data = await rest.put(
-            Routes.applicationCommands(clientId, guildId),
+            Routes.applicationCommands(clientId),
             { body: commands },
         );
 
