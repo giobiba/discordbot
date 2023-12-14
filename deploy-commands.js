@@ -1,5 +1,5 @@
 const { REST, Routes } = require('discord.js');
-const { token, clientId } = require('./config.json');
+const { clientId, guildId, token } = require('./config.json');
 const fs = require('node:fs');
 const path = require('node:path');
 
@@ -25,13 +25,14 @@ for (const folder of commandFolders) {
 
 // Construct and prepare an instance of the REST module
 const rest = new REST().setToken(token);
+
 (async () => {
     try {
         console.log(`Started refreshing ${commands.length} application (/) commands.`);
 
         // I guess if we want to do testing, we should add a guild id here to only deploy there
         const data = await rest.put(
-            Routes.applicationCommands(clientId),
+            Routes.applicationCommands(clientId, guildId),
             { body: commands },
         );
 
