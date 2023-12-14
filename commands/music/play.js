@@ -1,6 +1,6 @@
 const { SlashCommandBuilder } = require('@discordjs/builders');
 const { getVoiceConnection } = require('@discordjs/voice');
-
+const ytdl = require('ytdl-core');
 
 module.exports = {
     data: new SlashCommandBuilder()
@@ -18,7 +18,7 @@ module.exports = {
             return;
         }
 
-        global.player.play(global.resource);
+        global.player.play(ytdl('https://www.youtube.com/watch?v=BokbpfhV8O8'));
 
         await interaction.reply('playing....');
     },
