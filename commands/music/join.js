@@ -27,7 +27,9 @@ module.exports = {
                 });
             }
 
-            await interaction.deferReply({ content: 'Hi!', ephemeral: true });
+            connection.subscribe(global.player);
+
+            await interaction.reply({ content: 'Hi!', ephemeral: true });
         }
         else {
             await interaction.reply({ content: 'You are not connected to a channel', ephemeral: true });
