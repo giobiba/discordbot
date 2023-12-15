@@ -48,7 +48,6 @@ async function processUrl(url) {
 
 // retrieve top searches from a query on yt
 async function searchYouTube(query) {
-    console.log(ytApiId);
     const url = `https://www.googleapis.com/youtube/v3/search?part=snippet&q=${encodeURIComponent(query)}&key=${ytApiId}&maxResults=5`;
 
     try {
