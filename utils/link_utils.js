@@ -1,10 +1,16 @@
 const axios = require('axios');
 const { ytApiId } = require('../config.json');
 
+// enum for url types
+const UrlTypes = {
+    YouTube: 'yt_vid',
+    YouTubePlaylist: 'yt_list',
+};
+
 // regex list with all compatible
 const sourceRegexList = {
-    YouTube: /^(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/watch\?v=|youtu\.be\/)([a-zA-Z0-9_-]+)/,
-    YouTubePlaylist: /^(?:https?:\/\/)?(?:www\.)?youtube\.com\/playlist\?list=([a-zA-Z0-9_-]+)/,
+    [UrlTypes.YouTube]: /^(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/watch\?v=|youtu\.be\/)([a-zA-Z0-9_-]+)/,
+    [UrlTypes.YouTubePlaylist]: /^(?:https?:\/\/)?(?:www\.)?youtube\.com\/playlist\?list=([a-zA-Z0-9_-]+)/,
 };
 
 // matches url against regex
@@ -13,7 +19,7 @@ function identifyUrlType(url) {
         const regex = sourceRegexList[source];
         const match = url.match(regex);
         if (match) {
-            return { source, id: match[1] };
+            return { source: source, id: match[1] };
         }
     }
     return { source: null, id: null };
@@ -24,7 +30,7 @@ async function getYtItemsFromPlaylist(playlistId) {
     const url = `https://www.googleapis.com/youtube/v3/playlistItems?part=snippet&playlistId=${playlistId}&maxResults=100&key=${ytApiId}`;
     try {
         const response = await axios.get(url);
-        const videoIds = response.data.items.map(item => ({ source: 'YouTube', id: item.snippet.resourceId.videoId }));
+        const videoIds = response.data.items.map(item => ({ source: UrlTypes.YouTube, id: item.snippet.resourceId.videoId }));
         return videoIds;
     }
     catch (error) {
@@ -35,15 +41,15 @@ async function getYtItemsFromPlaylist(playlistId) {
 
 async function processUrl(url) {
     const { source, id } = identifyUrlType(url);
-
-    if (source === 'YouTubePlaylist') {
-        const videoIds = await getYtItemsFromPlaylist(id, ytApiId);
-        return videoIds;
+    console.log(source, UrlTypes.YouTubePlaylist);
+    switch (source) {
+        case null: return [];
+        case UrlTypes.YouTubePlaylist:{
+            const videoIds = await getYtItemsFromPlaylist(id, ytApiId);
+            return videoIds;
+        }
+        default: return [{ source: source, id: id }];
     }
-    else if (source) {
-        return [{ source, id }];
-    }
-    return [];
 }
 
 // retrieve top searches from a query on yt
