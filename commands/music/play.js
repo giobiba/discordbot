@@ -29,10 +29,6 @@ module.exports = {
 
         const stream = ytdl(url, { filter : 'audioonly', volume: 0.5, highWaterMark: 1 << 25 });
 
-        stream.on('progress', (d, total, length) => {
-            console.log('progress', total / length);
-        });
-
         global.resource = createAudioResource(stream);
         global.player.play(global.resource);
 

@@ -8,7 +8,6 @@ module.exports = {
     async execute(interaction) {
         if (interaction.member.voice.channel) {
             joinVC(interaction.member.voice.channel);
-
             await interaction.reply({ content: 'Joined!', ephemeral: true });
         }
         else {
