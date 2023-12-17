@@ -26,7 +26,7 @@ function identifyUrlType(url) {
 }
 
 // converts yt playlist to a list of (YouTube, <url>)
-async function getYtItemsFromPlaylist(playlistId, ytApiId) {
+async function getYtItemsFromPlaylist(playlistId) {
     const url = `https://www.googleapis.com/youtube/v3/playlistItems?part=snippet&playlistId=${playlistId}&maxResults=100&key=${ytApiId}`;
     try {
         const response = await axios.get(url);
@@ -45,7 +45,7 @@ async function processUrl(url) {
     switch (source) {
         case null: return [];
         case UrlTypes.YouTubePlaylist:{
-            const videoIds = await getYtItemsFromPlaylist(id, ytApiId);
+            const videoIds = await getYtItemsFromPlaylist(id);
             return videoIds;
         }
         default: return [{ source: source, id: id }];
