@@ -1,5 +1,5 @@
 const axios = require('axios');
-const { ytApiId } = require('../../config.json');
+const { ytApiId } = require('@config/config.json');
 
 // enum for url types
 const UrlTypes = {
@@ -26,7 +26,7 @@ function identifyUrlType(url) {
 }
 
 // converts yt playlist to a list of (YouTube, <url>)
-async function getYtItemsFromPlaylist(playlistId) {
+async function getYtItemsFromPlaylist(playlistId, ytApiId) {
     const url = `https://www.googleapis.com/youtube/v3/playlistItems?part=snippet&playlistId=${playlistId}&maxResults=100&key=${ytApiId}`;
     try {
         const response = await axios.get(url);

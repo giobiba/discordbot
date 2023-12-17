@@ -1,5 +1,5 @@
 const { SlashCommandBuilder } = require('@discordjs/builders');
-const { joinVC } = require('../../src/utils/voice_utils.ts');
+const { joinVC } = require('@utils/voice_utils.ts');
 
 module.exports = {
     data: new SlashCommandBuilder()

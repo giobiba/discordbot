@@ -1,6 +1,6 @@
 const { SlashCommandBuilder } = require('@discordjs/builders');
 const { getVoiceConnection, createAudioResource } = require('@discordjs/voice');
-const { joinVC } = require('../../src/utils/voice_utils.ts');
+const { joinVC } = require('@utils/voice_utils.ts');
 const ytdl = require('ytdl-core');
 
 module.exports = {

@@ -1,7 +1,7 @@
 const { Client, GatewayIntentBits } = require('discord.js');
 const { createAudioPlayer } = require('@discordjs/voice');
 
-const { token } = require('./config.json');
+const { token } = require('@config/config.json');
 
 global.client = new Client({
 	intents: [
