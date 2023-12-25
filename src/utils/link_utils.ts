@@ -1,36 +1,42 @@
-const axios = require('axios');
-const { ytApiId } = require('@config/config.json');
+import axios from 'axios';
+import { ytApiId } from '@config/config.json';
 
-// enum for url types
-const UrlTypes = {
-    YouTube: 'yt_vid',
-    YouTubePlaylist: 'yt_list',
-};
+// Enum for URL types
+enum UrlTypes {
+    YouTube = 'yt_vid',
+    YouTubePlaylist = 'yt_list',
+}
 
-// regex list with all compatible
-const sourceRegexList = {
+// Interface to match <platform, id>
+interface UrlItem {
+    source: UrlTypes | null;
+    id: string | null;
+}
+
+// Regex list with all compatible platforms
+const sourceRegexList: Record<UrlTypes, RegExp> = {
     [UrlTypes.YouTube]: /^(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/watch\?v=|youtu\.be\/)([a-zA-Z0-9_-]+)/,
     [UrlTypes.YouTubePlaylist]: /^(?:https?:\/\/)?(?:www\.)?youtube\.com\/playlist\?list=([a-zA-Z0-9_-]+)/,
 };
 
-// matches url against regex
-function identifyUrlType(url) {
+// Matches URL against regex
+function identifyUrlType(url: string): UrlItem {
     for (const source in sourceRegexList) {
-        const regex = sourceRegexList[source];
+        const regex = sourceRegexList[source as UrlTypes];
         const match = url.match(regex);
         if (match) {
-            return { source: source, id: match[1] };
+            return { source: source as UrlTypes, id: match[1] };
         }
     }
     return { source: null, id: null };
 }
 
-// converts yt playlist to a list of (YouTube, <url>)
-async function getYtItemsFromPlaylist(playlistId) {
+// Converts YouTube playlist to a list of YouTube video items
+async function getYtItemsFromPlaylist(playlistId: string): Promise<UrlItem[]> {
     const url = `https://www.googleapis.com/youtube/v3/playlistItems?part=snippet&playlistId=${playlistId}&maxResults=100&key=${ytApiId}`;
     try {
         const response = await axios.get(url);
-        const videoIds = response.data.items.map(item => ({ source: UrlTypes.YouTube, id: item.snippet.resourceId.videoId }));
+        const videoIds = response.data.items.map((item: any) => ({ source: UrlTypes.YouTube, id: item.snippet.resourceId.videoId }));
         return videoIds;
     }
     catch (error) {
@@ -39,21 +45,19 @@ async function getYtItemsFromPlaylist(playlistId) {
     }
 }
 
-async function processUrl(url) {
+// Processes a URL and returns a list of YouTube video items
+async function processUrl(url: string): Promise<UrlItem[]> {
     const { source, id } = identifyUrlType(url);
-    console.log(source, UrlTypes.YouTubePlaylist);
     switch (source) {
         case null: return [];
-        case UrlTypes.YouTubePlaylist:{
-            const videoIds = await getYtItemsFromPlaylist(id);
-            return videoIds;
-        }
-        default: return [{ source: source, id: id }];
+        case UrlTypes.YouTubePlaylist:
+            return getYtItemsFromPlaylist(id!);
+        default: return [{ source, id: id! }];
     }
 }
 
-// retrieve top searches from a query on yt
-async function searchYouTube(query) {
+// Retrieves top searches from a query on YouTube
+async function searchYouTube(query: string): Promise<any[]> {
     const url = `https://www.googleapis.com/youtube/v3/search?part=snippet&q=${encodeURIComponent(query)}&key=${ytApiId}&maxResults=5`;
 
     try {
@@ -66,7 +70,78 @@ async function searchYouTube(query) {
     }
 }
 
-module.exports = {
-    processUrl,
-    searchYouTube,
-};
+export { processUrl, searchYouTube };
+
+
+// const axios = require('axios');
+// const { ytApiId } = require('@config/config.json');
+
+// // enum for url types
+// const UrlTypes = {
+//     YouTube: 'yt_vid',
+//     YouTubePlaylist: 'yt_list',
+// };
+
+// // regex list with all compatible
+// const sourceRegexList = {
+//     [UrlTypes.YouTube]: /^(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/watch\?v=|youtu\.be\/)([a-zA-Z0-9_-]+)/,
+//     [UrlTypes.YouTubePlaylist]: /^(?:https?:\/\/)?(?:www\.)?youtube\.com\/playlist\?list=([a-zA-Z0-9_-]+)/,
+// };
+
+// // matches url against regex
+// function identifyUrlType(url) {
+//     for (const source in sourceRegexList) {
+//         const regex = sourceRegexList[source];
+//         const match = url.match(regex);
+//         if (match) {
+//             return { source: source, id: match[1] };
+//         }
+//     }
+//     return { source: null, id: null };
+// }
+
+// // converts yt playlist to a list of (YouTube, <url>)
+// async function getYtItemsFromPlaylist(playlistId) {
+//     const url = `https://www.googleapis.com/youtube/v3/playlistItems?part=snippet&playlistId=${playlistId}&maxResults=100&key=${ytApiId}`;
+//     try {
+//         const response = await axios.get(url);
+//         const videoIds = response.data.items.map(item => ({ source: UrlTypes.YouTube, id: item.snippet.resourceId.videoId }));
+//         return videoIds;
+//     }
+//     catch (error) {
+//         console.error('Error fetching playlist items:', error);
+//         return [];
+//     }
+// }
+
+// async function processUrl(url) {
+//     const { source, id } = identifyUrlType(url);
+//     console.log(source, UrlTypes.YouTubePlaylist);
+//     switch (source) {
+//         case null: return [];
+//         case UrlTypes.YouTubePlaylist:{
+//             const videoIds = await getYtItemsFromPlaylist(id);
+//             return videoIds;
+//         }
+//         default: return [{ source: source, id: id }];
+//     }
+// }
+
+// // retrieve top searches from a query on yt
+// async function searchYouTube(query) {
+//     const url = `https://www.googleapis.com/youtube/v3/search?part=snippet&q=${encodeURIComponent(query)}&key=${ytApiId}&maxResults=5`;
+
+//     try {
+//         const response = await axios.get(url);
+//         return response.data.items;
+//     }
+//     catch (error) {
+//         console.error('Error fetching data from YouTube:', error);
+//         return [];
+//     }
+// }
+
+// module.exports = {
+//     processUrl,
+//     searchYouTube,
+// };
