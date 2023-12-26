@@ -22,10 +22,12 @@ const sourceRegexList: Record<UrlTypes, RegExp> = {
 // Matches URL against regex
 function identifyUrlType(url: string): UrlItem {
     for (const source in sourceRegexList) {
-        const regex = sourceRegexList[source as UrlTypes];
-        const match = url.match(regex);
-        if (match) {
-            return { source: source as UrlTypes, id: match[1] };
+        if (Object.hasOwnProperty.call(sourceRegexList, source)) {
+            const regex = sourceRegexList[source as UrlTypes];
+            const match = url.match(regex);
+            if (match) {
+                return { source: source as UrlTypes, id: match[1] };
+            }
         }
     }
     return { source: null, id: null };
@@ -38,8 +40,7 @@ async function getYtItemsFromPlaylist(playlistId: string): Promise<UrlItem[]> {
         const response = await axios.get(url);
         const videoIds = response.data.items.map((item: any) => ({ source: UrlTypes.YouTube, id: item.snippet.resourceId.videoId }));
         return videoIds;
-    }
-    catch (error) {
+    } catch (error) {
         console.error('Error fetching playlist items:', error);
         return [];
     }
@@ -49,22 +50,20 @@ async function getYtItemsFromPlaylist(playlistId: string): Promise<UrlItem[]> {
 async function processUrl(url: string): Promise<UrlItem[]> {
     const { source, id } = identifyUrlType(url);
     switch (source) {
-        case null: return [];
-        case UrlTypes.YouTubePlaylist:
-            return getYtItemsFromPlaylist(id!);
-        default: return [{ source, id: id! }];
+    case null: return [];
+    case UrlTypes.YouTubePlaylist:
+        return getYtItemsFromPlaylist(id!);
+    default: return [{ source, id: id! }];
     }
 }
 
 // Retrieves top searches from a query on YouTube
 async function searchYouTube(query: string): Promise<any[]> {
     const url = `https://www.googleapis.com/youtube/v3/search?part=snippet&q=${encodeURIComponent(query)}&key=${ytApiId}&maxResults=5`;
-
     try {
         const response = await axios.get(url);
         return response.data.items;
-    }
-    catch (error) {
+    } catch (error) {
         console.error('Error fetching data from YouTube:', error);
         return [];
     }

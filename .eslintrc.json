@@ -10,11 +10,15 @@
 		"es6": true
 	},
 	"parserOptions": {
-		"ecmaVersion": 2021,
+		"ecmaVersion": 2022,
 		"sourceType": "module",
 		"project": "./tsconfig.json"
 	},
 	"rules": {
 	  // Override any rules we do not like
+	  "object-curly-spacing": ["error", "always"],
+	  "require-jsdoc": "off",
+	  "indent": ["error", 4],
+      "max-len": "off"
 	}
 }
