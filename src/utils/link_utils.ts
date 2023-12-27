@@ -13,6 +13,40 @@ interface UrlItem {
     id: string | null;
 }
 
+interface YouTubePlaylistItem {
+    snippet: {
+        // Other snippet details can be included here
+        resourceId: {
+            videoId: string; // The unique ID of the video
+        };
+    };
+}
+
+interface YouTubeSearchResultItem {
+    id: {
+        kind: string;
+        videoId: string;
+    };
+    snippet: {
+        publishedAt: string;
+        channelId: string;
+        title: string;
+        description: string;
+        thumbnails: {
+            [key: string]: {
+                url: string;
+                width: number;
+                height: number;
+            };
+        };
+        channelTitle: string;
+    };
+}
+
+interface YouTubeSearchResponse {
+    items: YouTubeSearchResultItem[];
+}
+
 // Regex list with all compatible platforms
 const sourceRegexList: Record<UrlTypes, RegExp> = {
     [UrlTypes.YouTube]: /^(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/watch\?v=|youtu\.be\/)([a-zA-Z0-9_-]+)/,
@@ -38,7 +72,7 @@ async function getYtItemsFromPlaylist(playlistId: string): Promise<UrlItem[]> {
     const url = `https://www.googleapis.com/youtube/v3/playlistItems?part=snippet&playlistId=${playlistId}&maxResults=100&key=${ytApiId}`;
     try {
         const response = await axios.get(url);
-        const videoIds = response.data.items.map((item: any) => ({ source: UrlTypes.YouTube, id: item.snippet.resourceId.videoId }));
+        const videoIds = response.data.items.map((item: YouTubePlaylistItem) => ({ source: UrlTypes.YouTube, id: item.snippet.resourceId.videoId }));
         return videoIds;
     } catch (error) {
         console.error('Error fetching playlist items:', error);
@@ -58,10 +92,10 @@ async function processUrl(url: string): Promise<UrlItem[]> {
 }
 
 // Retrieves top searches from a query on YouTube
-async function searchYouTube(query: string): Promise<any[]> {
+async function searchYouTube(query: string): Promise<YouTubeSearchResultItem[]> {
     const url = `https://www.googleapis.com/youtube/v3/search?part=snippet&q=${encodeURIComponent(query)}&key=${ytApiId}&maxResults=5`;
     try {
-        const response = await axios.get(url);
+        const response = await axios.get<YouTubeSearchResponse>(url);
         return response.data.items;
     } catch (error) {
         console.error('Error fetching data from YouTube:', error);
