@@ -20,6 +20,7 @@
 	  "require-jsdoc": "off",
 	  "indent": ["error", 4],
       "max-len": "off",
+	  "linebreak-style": "off",
 	  // fix unused variables
 	  "no-unused-vars": "off",
 	  "@typescript-eslint/no-unused-vars": "error"
