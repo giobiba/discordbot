@@ -10,7 +10,8 @@ const handleDisconnect = (connection: VoiceConnection): (() => Promise<void>) =>
                 entersState(connection, VoiceConnectionStatus.Connecting, 5_000),
             ]);
         // Connection is attempting to reconnect
-        } catch (error) {
+        }
+        catch (error) {
             if (connection &&
                 connection.state.status !== VoiceConnectionStatus.Destroyed) {
                 connection.destroy();

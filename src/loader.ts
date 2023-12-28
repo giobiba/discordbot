@@ -5,7 +5,8 @@ import path from 'node:path';
 const basePath = path.join(__dirname, '../');
 
 global.client.commands = new Collection();
-const commands: any[] = exportCommands(basePath);
+
+const commands = exportCommands(basePath);
 
 for (const command of commands) {
     global.client.commands.set(command.name, command);

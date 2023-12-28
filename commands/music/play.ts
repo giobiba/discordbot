@@ -1,13 +1,13 @@
-const { SlashCommandBuilder } = require('@discordjs/builders');
-const { getVoiceConnection, createAudioResource } = require('@discordjs/voice');
-const { joinVC } = require('@utils/voice_utils.ts');
-const ytdl = require('ytdl-core');
+import { SlashCommandBuilder } from '@discordjs/builders';
+import { getVoiceConnection, createAudioResource } from '@discordjs/voice';
+import { joinVC } from '@utils/voice_utils';
+import ytdl from 'ytdl-core';
 
 module.exports = {
     data: new SlashCommandBuilder()
         .setName('play')
         .setDescription('Play a song to the bot')
-        .addStringOption(option => option
+        .addStringOption((option) => option
             .setName('query')
             .setDescription('Name of the song')
             .setRequired(false)),
@@ -27,7 +27,7 @@ module.exports = {
             }
         }
 
-        const stream = ytdl(url, { filter : 'audioonly', volume: 0.5, highWaterMark: 1 << 25 });
+        const stream = ytdl(url, { filter: 'audioonly', highWaterMark: 1 << 25 });
 
         global.resource = createAudioResource(stream);
         global.player.play(global.resource);

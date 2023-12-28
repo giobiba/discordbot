@@ -29,7 +29,8 @@ async function getYtItemsFromPlaylist(playlistId: string): Promise<UrlItem[]> {
         const response = await axios.get(url);
         const videoIds = response.data.items.map((item: YouTubePlaylistItem) => ({ source: UrlTypes.YouTube, id: item.snippet.resourceId.videoId }));
         return videoIds;
-    } catch (error) {
+    }
+    catch (error) {
         console.error('Error fetching playlist items:', error);
         return [];
     }
@@ -52,7 +53,8 @@ async function searchYouTube(query: string): Promise<YouTubeSearchResultItem[]> 
     try {
         const response = await axios.get<YouTubeSearchResponse>(url);
         return response.data.items;
-    } catch (error) {
+    }
+    catch (error) {
         console.error('Error fetching data from YouTube:', error);
         return [];
     }
