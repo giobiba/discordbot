@@ -13,26 +13,23 @@ const exportCommands = (basePath: string) => {
 
     const foldersPath: string = path.join(basePath, 'commands');
     const commandFolders: string[] = fs.readdirSync(foldersPath);
-    
-
     for (const folder of commandFolders) {
         const commandsPath: string = path.join(foldersPath, folder);
-        const commandFiles: string[] = fs.readdirSync(commandsPath).filter(file => file.endsWith('.ts'));
+        const commandFiles: string[] = fs.readdirSync(commandsPath).filter((file) => file.endsWith('.ts'));
         // Grab the SlashCommandBuilder#toJSON() output of each command's data for deployment
         for (const file of commandFiles) {
             const filePath: string = path.join(commandsPath, file);
             const command: CommandObject = require(filePath)
             if (command.data !== undefined && command.execute !== undefined) {
                 commands.push(command.data.toJSON());
-            }
-            else {
+            } else {
                 console.log(`[WARNING] The command at ${filePath} is missing a required "data" or "execute" property.`);
             }
         }
     }
 
     return commands;
-}
+};
 
 const deployCommands = (async (commands) => {
     try {
@@ -45,15 +42,14 @@ const deployCommands = (async (commands) => {
         );
 
         console.log(`Successfully reloaded ${data.length} application (/) commands.`);
-    }
-    catch (error) {
+    } catch (error) {
         console.error(error);
     }
-})
+});
 
 const deployEvents = (basePath: string) => {
     const discordEventsFolder = path.join(basePath, 'events', 'discord');
-    const discordEvents = fs.readdirSync(discordEventsFolder).filter(file => file.endsWith('.ts'));
+    const discordEvents = fs.readdirSync(discordEventsFolder).filter((file) => file.endsWith('.ts'));
 
     for (const file of discordEvents) {
         const filePath = path.join(discordEventsFolder, file);
@@ -68,6 +64,6 @@ const deployEvents = (basePath: string) => {
     }
 
     // in the future to do the player events as well
-}
+};
 
 export { exportCommands, deployCommands, deployEvents };

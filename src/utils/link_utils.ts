@@ -1,6 +1,6 @@
 import axios from 'axios';
 import { ytApiId } from '@config/config.json';
-import { UrlTypes, UrlItem, YouTubePlaylistItem, YouTubeSearchResultItem, YouTubeSearchResponse} from '@typing';
+import { UrlTypes, UrlItem, YouTubePlaylistItem, YouTubeSearchResultItem, YouTubeSearchResponse } from '@typing';
 
 // Regex list with all compatible platforms
 const sourceRegexList: Record<UrlTypes, RegExp> = {

@@ -4,9 +4,9 @@ import { createAudioPlayer } from '@discordjs/voice';
 import { token } from '@config/config.json';
 
 global.client = new Client({
-	intents: [
-		GatewayIntentBits.Guilds, GatewayIntentBits.GuildVoiceStates,
-	],
+    intents: [
+        GatewayIntentBits.Guilds, GatewayIntentBits.GuildVoiceStates,
+    ],
 }),
 global.player = createAudioPlayer();
 
