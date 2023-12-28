@@ -1,7 +1,7 @@
 import { SlashCommandBuilder } from '@discordjs/builders';
 import { getVoiceConnection } from '@discordjs/voice';
 
-module.exports = {
+export = {
     data: new SlashCommandBuilder()
         .setName('leave')
         .setDescription('Leave the current voice channel'),

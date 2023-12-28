@@ -3,7 +3,7 @@ import { getVoiceConnection, createAudioResource } from '@discordjs/voice';
 import { joinVC } from '@utils/voice_utils';
 import ytdl from 'ytdl-core';
 
-module.exports = {
+export = {
     data: new SlashCommandBuilder()
         .setName('play')
         .setDescription('Play a song to the bot')

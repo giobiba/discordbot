@@ -1,7 +1,7 @@
 import { SlashCommandBuilder } from '@discordjs/builders';
 import { joinVC } from '@utils/voice_utils';
 
-module.exports = {
+export = {
     data: new SlashCommandBuilder()
         .setName('join')
         .setDescription('Join the voice channel of the requester.'),
