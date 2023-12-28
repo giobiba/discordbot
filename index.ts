@@ -1,16 +1,16 @@
-const { Client, GatewayIntentBits } = require('discord.js');
-const { createAudioPlayer } = require('@discordjs/voice');
+import { Client, GatewayIntentBits } from 'discord.js';
+import { createAudioPlayer } from '@discordjs/voice';
 
-const { token } = require('@config/config.json');
+import { token } from '@config/config.json';
 
 global.client = new Client({
 	intents: [
 		GatewayIntentBits.Guilds, GatewayIntentBits.GuildVoiceStates,
 	],
 }),
-
 global.player = createAudioPlayer();
 
-require('./src/loader.ts');
+// load the commands and events
+import '@src/loader';
 
 global.client.login(token);

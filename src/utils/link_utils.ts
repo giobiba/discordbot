@@ -1,51 +1,6 @@
 import axios from 'axios';
 import { ytApiId } from '@config/config.json';
-
-// Enum for URL types
-enum UrlTypes {
-    YouTube = 'yt_vid',
-    YouTubePlaylist = 'yt_list',
-}
-
-// Interface to match <platform, id>
-interface UrlItem {
-    source: UrlTypes | null;
-    id: string | null;
-}
-
-interface YouTubePlaylistItem {
-    snippet: {
-        // Other snippet details can be included here
-        resourceId: {
-            videoId: string; // The unique ID of the video
-        };
-    };
-}
-
-interface YouTubeSearchResultItem {
-    id: {
-        kind: string;
-        videoId: string;
-    };
-    snippet: {
-        publishedAt: string;
-        channelId: string;
-        title: string;
-        description: string;
-        thumbnails: {
-            [key: string]: {
-                url: string;
-                width: number;
-                height: number;
-            };
-        };
-        channelTitle: string;
-    };
-}
-
-interface YouTubeSearchResponse {
-    items: YouTubeSearchResultItem[];
-}
+import { UrlTypes, UrlItem, YouTubePlaylistItem, YouTubeSearchResultItem, YouTubeSearchResponse} from '@typing';
 
 // Regex list with all compatible platforms
 const sourceRegexList: Record<UrlTypes, RegExp> = {
