@@ -14,5 +14,11 @@ exportCommands(basePath).then((commands) => {
 
     console.log('\n' + '-'.repeat(40) + '\n');
 
+<<<<<<< HEAD
     deployEvents(basePath);
 });
+=======
+console.log('\n' + '-'.repeat(40) + '\n');
+
+deployEvents(basePath);
+>>>>>>> 2ea3b6a2facad974897968dd3242b27d95241c27
