@@ -8,7 +8,7 @@
   "license": "MIT",
   "private": true,
   "lint-staged": {
-    "*.js": "eslint --fix"
+    "*.ts": "eslint --fix"
   },
   "scripts": {
     "postinstall": "husky install"
