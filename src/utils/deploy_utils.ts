@@ -20,10 +20,10 @@ const exportCommands = async (basePath: string) => {
 
         // Grab the SlashCommandBuilder#toJSON() output of each command's data for deployment
         for (const file of commandFiles) {
-            const filePath: string = path.join(commandsPath, file.split('.')[0]); /* 'file:///' += */
+            const filePath: string = path.join(commandsPath, file); /* 'file:///' += */
             const command: CommandObject = await require(filePath); /* import */
             if (command.data !== undefined && command.execute !== undefined) {
-                commands.push(command.data.toJSON());
+                commands.push(command);
             }
             else {
                 console.log(`[WARNING] The command ${filePath} is missing a required "data" or "execute" property.`);

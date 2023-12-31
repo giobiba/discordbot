@@ -8,17 +8,11 @@ global.client.commands = new Collection();
 
 exportCommands(basePath).then((commands) => {
     for (const command of commands) {
-        global.client.commands.set(command.name, command);
-        console.log(`-> [Loaded Discord Command] ${command.name}`);
+        global.client.commands.set(command.data.name, command);
+        console.log(`-> [Loaded Discord Command] ${command.data.name}`);
     }
 
     console.log('\n' + '-'.repeat(40) + '\n');
 
-<<<<<<< HEAD
     deployEvents(basePath);
 });
-=======
-console.log('\n' + '-'.repeat(40) + '\n');
-
-deployEvents(basePath);
->>>>>>> 2ea3b6a2facad974897968dd3242b27d95241c27
