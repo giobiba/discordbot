@@ -1,8 +1,9 @@
 import { SlashCommandBuilder } from '@discordjs/builders';
+import { CommandInteraction } from 'discord.js';
 
 export interface CommandObject {
     data: SlashCommandBuilder,
-    execute: (interaction: any) => Promise<unknown>,
+    execute: (interaction: CommandInteraction) => Promise<void>,
 }
 
 export enum UrlTypes {
