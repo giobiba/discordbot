@@ -8,7 +8,7 @@
   "license": "MIT",
   "private": true,
   "lint-staged": {
-    "*.js": "eslint --fix"
+    "*.ts": "eslint --fix"
   },
   "scripts": {
     "postinstall": "husky install"
@@ -16,15 +16,21 @@
   "dependencies": {
     "@discordjs/voice": "^0.16.1",
     "axios": "^1.6.2",
+    "discord-api-types": "^0.37.67",
     "discord.js": "^14.14.1",
     "ffmpeg-static": "^5.2.0",
     "sodium-native": "^4.0.4",
     "ytdl-core": "^4.11.5"
   },
   "devDependencies": {
-    "eslint": "^8.55.0",
+    "@typescript-eslint/eslint-plugin": "^6.15.0",
+    "@typescript-eslint/parser": "^6.15.0",
+    "eslint": "^8.56.0",
     "eslint-config-google": "^0.14.0",
     "husky": "^8.0.3",
-    "lint-staged": "^15.2.0"
+    "lint-staged": "^15.2.0",
+    "ts-node": "^10.9.2",
+    "tsconfig-paths": "^4.2.0",
+    "typescript": "^5.3.3"
   }
 }
