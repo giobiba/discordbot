@@ -9,7 +9,7 @@ import { CommandObject } from '@typing';
 const rest = new REST().setToken(token);
 
 const exportCommands = async (basePath: string) => {
-    const commands: any[] = [];
+    const commands: CommandObject[] = [];
 
     const foldersPath: string = path.join(basePath, 'commands');
     const commandFolders: string[] = fs.readdirSync(foldersPath);
@@ -33,7 +33,7 @@ const exportCommands = async (basePath: string) => {
     return commands;
 };
 
-const deployCommands = async (commands: any[]) => {
+const deployCommands = async (commands: CommandObject[]) => {
     try {
         console.log(`Started refreshing ${commands.length} application (/) commands.`);
 
@@ -42,6 +42,7 @@ const deployCommands = async (commands: any[]) => {
             Routes.applicationCommands(clientId),
             { body: commands },
         );
+        console.log(data);
 
         console.log(`Successfully reloaded ${data.length} application (/) commands.`);
     }
