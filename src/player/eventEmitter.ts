@@ -1,1 +1,1 @@
-export { EventEmitter } from 'node:events';
+export { Emitter as EventEmitter } from 'strict-event-emitter';
