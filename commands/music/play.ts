@@ -1,6 +1,6 @@
 import { SlashCommandBuilder } from '@discordjs/builders';
-import { getVoiceConnection, createAudioResource } from '@discordjs/voice';
-import { joinVC } from '@utils/voice_utils';
+import { createVC } from '@utils/voice_utils';
+import { StreamDispacher } from '@src/player/streamDispacher';
 import ytdl from 'ytdl-core';
 
 export = {
@@ -17,9 +17,9 @@ export = {
             url = 'https://www.youtube.com/watch?v=BokbpfhV8O8';
         }
 
-        if (!getVoiceConnection(interaction.guild.id)) {
+        if (!global.streamDispatcher) {
             if (interaction.member.voice.channel) {
-                joinVC(interaction.member.voice.channel);
+                global.streamDispacher = new StreamDispacher(createVC(interaction.member.voice.channel), interaction.member.voice.channel);
             }
             else {
                 interaction.reply('You are not connected to a voice channel');
@@ -27,11 +27,7 @@ export = {
             }
         }
 
-        const stream = ytdl(url, { filter: 'audioonly', highWaterMark: 1 << 25 });
-
-        global.resource = createAudioResource(stream);
-        global.player.play(global.resource);
-
-        await interaction.reply('playing....');
+        global.streamDispacher.createAudioResource(ytdl(url, { filter: 'audioonly', highWaterMark: 1 << 25 }));
+        global.streamDispacher.play();
     },
 };

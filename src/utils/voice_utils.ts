@@ -20,21 +20,12 @@ const handleDisconnect = (connection: VoiceConnection): (() => Promise<void>) =>
     };
 };
 
-const joinVC = (channel: VoiceChannel): VoiceConnection => {
-    const connection = joinVoiceChannel({
+const createVC = (channel: VoiceChannel) => {
+    return joinVoiceChannel({
         channelId: channel.id,
         guildId: channel.guildId,
         adapterCreator: channel.guild.voiceAdapterCreator,
     });
-
-    // Remove listener if it exists
-    connection.off(VoiceConnectionStatus.Disconnected, handleDisconnect(connection));
-    // Add listener
-    connection.on(VoiceConnectionStatus.Disconnected, handleDisconnect(connection));
-
-    connection.subscribe(globalThis.player); // Ensure that 'player' is declared in the global scope
-
-    return connection;
 };
 
-export { handleDisconnect, joinVC };
+export { handleDisconnect, createVC };

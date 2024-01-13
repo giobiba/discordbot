@@ -1,5 +1,6 @@
 import { SlashCommandBuilder } from '@discordjs/builders';
-import { joinVC } from '@utils/voice_utils';
+import { StreamDispacher } from '@src/player/streamDispacher';
+import { createVC } from '@utils/voice_utils';
 
 export = {
     data: new SlashCommandBuilder()
@@ -7,7 +8,10 @@ export = {
         .setDescription('Join the voice channel of the requester.'),
     async execute(interaction) {
         if (interaction.member.voice.channel) {
-            joinVC(interaction.member.voice.channel);
+            if (!global.streamDispatcher) {
+                global.streamDispacher = new StreamDispacher(createVC(interaction.member.voice.channel), interaction.member.voice.channel);
+            }
+
             await interaction.reply({ content: 'Joined!', ephemeral: true });
         }
         else {
