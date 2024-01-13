@@ -50,3 +50,31 @@ export interface YouTubeSearchResultItem {
 export interface YouTubeSearchResponse {
     items: YouTubeSearchResultItem[];
 }
+
+export interface YoutubeVideoContentResponse {
+    items: YouTubeVideoItem[];
+}
+
+export interface YouTubeVideoItem {
+    snippet: {
+        title: string;
+        thumbnails: {
+            high: {
+                url: string;
+            };
+        };
+        channelTitle: string;
+    };
+    contentDetails: {
+        duration: string;
+    };
+}
+
+export interface Track {
+    title: string;
+    duration: string; // ISO 8601 duration format
+    link: string;
+    thumbnail: string;
+    author: string;
+    source: string; // YouTube
+}

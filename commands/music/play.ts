@@ -2,6 +2,10 @@ import { SlashCommandBuilder } from '@discordjs/builders';
 import { createVC } from '@utils/voice_utils';
 import { StreamDispacher } from '@src/player/streamDispacher';
 import ytdl from 'ytdl-core';
+import { EmbedBuilder } from 'discord.js';
+import { processUrl, searchYouTube, fetchYouTubeVideoDetails } from '@src/utils/link_utils';
+import { UrlItem, YouTubeSearchResultItem, Track } from '@src/typing';
+import { convertDuration } from '@src/utils/conversion_utils';
 
 export = {
     data: new SlashCommandBuilder()
@@ -9,12 +13,32 @@ export = {
         .setDescription('Play a song to the bot')
         .addStringOption((option) => option
             .setName('query')
-            .setDescription('Name of the song')
+            .setDescription('name of the song/search query')
             .setRequired(false)),
     async execute(interaction) {
-        let url = interaction.options.getString('query');
-        if (!url) {
-            url = 'https://www.youtube.com/watch?v=BokbpfhV8O8';
+        const query: string = interaction.options.getString('query');
+        const requestedUrlItems: UrlItem[] = await processUrl(query);
+        if (requestedUrlItems.length === 0) {
+            const searchResultsOfQuery: YouTubeSearchResultItem[] = await searchYouTube(query);
+            if (searchResultsOfQuery.length === 0) {
+                interaction.reply('Youtube did not yield any search results. Try again!');
+                return;
+            }
+            const searchResultsEmbed: EmbedBuilder = new EmbedBuilder()
+                .setColor('#9867C5')
+                .setTitle('Search Results:');
+
+            let counter: number = 0;
+            for (const searchResult of searchResultsOfQuery) {
+                const title: string = searchResult.snippet.title;
+                counter++;
+                searchResultsEmbed.addFields({ name: '\u200B', value: `${counter}. ${title}` });
+            }
+
+            await interaction.reply({
+                embeds: [searchResultsEmbed],
+            });
+            return;
         }
 
         if (!global.streamDispatcher) {
@@ -27,7 +51,22 @@ export = {
             }
         }
 
-        global.streamDispacher.createAudioResource(ytdl(url, { filter: 'audioonly', highWaterMark: 1 << 25 }));
+        const track: Track = await fetchYouTubeVideoDetails(requestedUrlItems[0].id!);
+        const playEmbed: EmbedBuilder = new EmbedBuilder()
+            .setTitle(track.title).setURL(track.link)
+            .setAuthor({ name: track.author })
+            .setThumbnail(track.thumbnail)
+            .addFields(
+                { name: 'Duration', value: convertDuration(track.duration), inline: true },
+            )
+            .setTimestamp()
+            .setColor('#9867C5');
+
+        global.streamDispacher.createAudioResource(ytdl(track.link, { filter: 'audioonly', highWaterMark: 1 << 25 }));
         global.streamDispacher.play();
+
+        await interaction.reply({
+            embeds: [playEmbed],
+        });
     },
 };
