@@ -7,6 +7,7 @@ import {
     createAudioPlayer,
     entersState,
     createAudioResource,
+    AudioPlayerStatus,
 } from '@discordjs/voice';
 import { VoiceChannel } from 'discord.js';
 import { EventEmitter } from '@src/player/eventEmitter';
@@ -15,6 +16,10 @@ import { Readable } from 'node:stream';
 export type VoiceEvents = {
     error: [error: Error];
     debug: [message: string];
+    start: [resource: AudioResource];
+    paused: [];
+    resume: [],
+    finish: [resource: AudioResource];
     connDestroyed: [];
 }
 
@@ -34,8 +39,8 @@ export class StreamDispacher extends EventEmitter<VoiceEvents> {
 
         this.voiceConnection.on('debug', (message) => this.emit('debug', message));
         this.voiceConnection.on('error', (error) => this.emit('error', error));
-        this.voiceConnection.on('debug', (message) => this.emit('debug', message));
-        this.voiceConnection.on('error', (error) => this.emit('error', error));
+        this.audioPlayer.on('debug', (message) => this.emit('debug', message));
+        this.audioPlayer.on('error', (error) => this.emit('error', error));
 
         this.voiceConnection
             .on(VoiceConnectionStatus.Disconnected, async (oldState, newState) => {
@@ -60,6 +65,26 @@ export class StreamDispacher extends EventEmitter<VoiceEvents> {
                 this.audioPlayer.stop();
                 this.emit('connDestroyed');
             });
+
+        this.audioPlayer.on('stateChange', (oldState, newState) => {
+            if (oldState.status !== AudioPlayerStatus.Paused && newState.status == AudioPlayerStatus.Paused) {
+                this.emit('paused');
+            }
+
+            if (oldState.status === AudioPlayerStatus.Paused && newState.status !== AudioPlayerStatus.Paused) {
+                this.emit('resume');
+            }
+
+            if (newState.status === AudioPlayerStatus.Playing && (oldState.status === AudioPlayerStatus.Idle || oldState.status === AudioPlayerStatus.Buffering)) {
+                this.emit('start', this.audioResource!);
+            }
+
+            if (newState.status === AudioPlayerStatus.Idle && oldState.status !== AudioPlayerStatus.Idle) {
+                this.emit('finish', this.audioResource!);
+                this.audioResource = null;
+            }
+        });
+
         this.connectionTimeout = connectionTimeout;
 
         this.voiceConnection.subscribe(this.audioPlayer);
