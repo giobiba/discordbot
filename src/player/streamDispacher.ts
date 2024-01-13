@@ -1,4 +1,13 @@
-import { AudioPlayer, AudioResource, VoiceConnection, VoiceConnectionDisconnectReason, VoiceConnectionStatus, createAudioPlayer, entersState, createAudioResource } from '@discordjs/voice';
+import {
+    AudioPlayer,
+    AudioResource,
+    VoiceConnection,
+    VoiceConnectionDisconnectReason,
+    VoiceConnectionStatus,
+    createAudioPlayer,
+    entersState,
+    createAudioResource,
+} from '@discordjs/voice';
 import { VoiceChannel } from 'discord.js';
 import { EventEmitter } from '@src/player/eventEmitter';
 import { Readable } from 'node:stream';
