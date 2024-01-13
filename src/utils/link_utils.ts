@@ -79,7 +79,7 @@ async function fetchYouTubeVideoDetails(videoId: string): Promise<Track> {
         thumbnail: snippet.thumbnails.high.url,
         author: snippet.channelTitle,
         source: `YouTube`,
-    };
+    } as Track;
 }
 
 export { processUrl, searchYouTube, fetchYouTubeVideoDetails };
