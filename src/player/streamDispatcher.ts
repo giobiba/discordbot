@@ -23,7 +23,7 @@ export type VoiceEvents = {
     connDestroyed: [];
 }
 
-export class StreamDispacher extends EventEmitter<VoiceEvents> {
+export class StreamDispatcher extends EventEmitter<VoiceEvents> {
     public voiceConnection: VoiceConnection;
     public audioPlayer: AudioPlayer;
     public voiceChannel: VoiceChannel;
@@ -98,7 +98,7 @@ export class StreamDispacher extends EventEmitter<VoiceEvents> {
 
     disconnect() {
         if (this.audioPlayer) this.audioPlayer.stop(true);
-        if (this.voiceConnection.state.status != VoiceConnectionStatus.Destroyed) this.voiceConnection.destroy();
+        if (this.voiceConnection.state.status !== VoiceConnectionStatus.Destroyed) this.voiceConnection.destroy();
     }
 
     async createAudioResource(src: Readable) {

@@ -1,6 +1,6 @@
 import { SlashCommandBuilder } from '@discordjs/builders';
 import { createVC } from '@utils/voice_utils';
-import { StreamDispacher } from '@src/player/streamDispacher';
+import { StreamDispatcher } from '@src/player/streamDispatcher';
 import ytdl from 'ytdl-core';
 import { EmbedBuilder } from 'discord.js';
 import { processUrl, searchYouTube, fetchYouTubeVideoDetails } from '@src/utils/link_utils';
@@ -43,7 +43,7 @@ export = {
 
         if (!global.streamDispatcher) {
             if (interaction.member.voice.channel) {
-                global.streamDispacher = new StreamDispacher(createVC(interaction.member.voice.channel), interaction.member.voice.channel);
+                global.streamDispatcher = new StreamDispatcher(createVC(interaction.member.voice.channel), interaction.member.voice.channel);
             }
             else {
                 interaction.reply('You are not connected to a voice channel');
@@ -62,8 +62,8 @@ export = {
             .setTimestamp()
             .setColor('#9867C5');
 
-        global.streamDispacher.createAudioResource(ytdl(track.link, { filter: 'audioonly', highWaterMark: 1 << 25 }));
-        global.streamDispacher.play();
+        global.streamDispatcher.createAudioResource(ytdl(track.link, { filter: 'audioonly', highWaterMark: 1 << 25 }));
+        global.streamDispatcher.play();
 
         await interaction.reply({
             embeds: [playEmbed],

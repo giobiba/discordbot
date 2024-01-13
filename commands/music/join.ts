@@ -1,5 +1,5 @@
 import { SlashCommandBuilder } from '@discordjs/builders';
-import { StreamDispacher } from '@src/player/streamDispacher';
+import { StreamDispatcher } from '@src/player/streamDispatcher';
 import { createVC } from '@utils/voice_utils';
 
 export = {
@@ -9,10 +9,10 @@ export = {
     async execute(interaction) {
         if (interaction.member.voice.channel) {
             if (!global.streamDispatcher) {
-                global.streamDispacher = new StreamDispacher(createVC(interaction.member.voice.channel), interaction.member.voice.channel);
-            }
+                global.streamDispatcher = new StreamDispatcher(createVC(interaction.member.voice.channel), interaction.member.voice.channel);
 
-            await interaction.reply({ content: 'Joined!', ephemeral: true });
+                await interaction.reply({ content: 'Joined!', ephemeral: true });
+            }
         }
         else {
             await interaction.reply({ content: 'You are not connected to a voice channel!', ephemeral: true });
