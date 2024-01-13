@@ -2,9 +2,10 @@ import { SlashCommandBuilder } from '@discordjs/builders';
 import { getVoiceConnection } from '@discordjs/voice'; // , createAudioResource
 import { EmbedBuilder } from 'discord.js';
 import { joinVC } from '@utils/voice_utils';
-import { processUrl, searchYouTube } from '@src/utils/link_utils';
+import { processUrl, searchYouTube, fetchYouTubeVideoDetails } from '@src/utils/link_utils';
 // import ytdl from 'ytdl-core';
-import { UrlItem, YouTubeSearchResultItem } from '@src/typing';
+import { UrlItem, YouTubeSearchResultItem, Track } from '@src/typing';
+import { convertDuration } from '@src/utils/conversion_utils';
 
 export = {
     data: new SlashCommandBuilder()
@@ -49,6 +50,17 @@ export = {
                 return;
             }
         }
+
+        const track: Track = await fetchYouTubeVideoDetails(requestedUrlItems[0].id!);
+        const playEmbed: EmbedBuilder = new EmbedBuilder()
+            .setTitle(track.title).setURL(track.link)
+            .setAuthor({ name: track.author })
+            .setThumbnail(track.thumbnail)
+            .addFields(
+                { name: 'Duration', value: convertDuration(track.duration), inline: true },
+            )
+            .setTimestamp()
+            .setColor('#9867C5');
         // let url = interaction.options.getString('query');
         // if (!url) {
         //     url = 'https://www.youtube.com/watch?v=BokbpfhV8O8';
@@ -59,6 +71,8 @@ export = {
         // global.resource = createAudioResource(stream);
         // global.player.play(global.resource);
 
-        await interaction.reply('Placeholder for playing');
+        await interaction.reply({
+            embeds: [playEmbed],
+        });
     },
 };
