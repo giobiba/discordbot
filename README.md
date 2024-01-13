@@ -5,21 +5,21 @@ Previous version: [qbot](https://github.com/raresboza/qbot)
 
 Create a config/config.json with the `token` and  `clientId` fields.
 
-To install dependencies do and activate pre-commit hook:
+To install dependencies and activate pre-commit hook:
 ```
 npm install
 ```
 ## Run
-The execution engine that we use is `ts-node`, to be able to do path mapping with `tsconfig-paths`.
-So before running we also need to intall:
+The execution engine that we use is `ts-node`, in order to be able to do path mapping with `tsconfig-paths`.
+Therefore, before running we also need to install:
 ```
 npm i -g ts-node
 ```
-Firstly we need to deploy the commands by runnning:
+Deploy the commands of the bot by running:
 ```
 ts-node src/deploy-commands.ts
 ```
-Then, to start the bot, we run the command:
+Start the bot using the following command:
 ```
 ts-node index.ts
 ```

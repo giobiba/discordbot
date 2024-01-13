@@ -1,6 +1,7 @@
 import axios from 'axios';
 import { ytApiId } from '@config/config.json';
-import { UrlTypes, UrlItem, YouTubePlaylistItem, YouTubeSearchResultItem, YouTubeSearchResponse } from '@typing';
+import { UrlTypes, UrlItem, YouTubePlaylistItem, YouTubeSearchResultItem,
+    YouTubeSearchResponse, YoutubeVideoContentResponse, YouTubeVideoItem, Track } from '@typing';
 
 // Regex list with all compatible platforms
 const sourceRegexList: Record<UrlTypes, RegExp> = {
@@ -38,7 +39,7 @@ async function getYtItemsFromPlaylist(playlistId: string): Promise<UrlItem[]> {
 
 // Processes a URL and returns a list of YouTube video items
 async function processUrl(url: string): Promise<UrlItem[]> {
-    const { source, id } = identifyUrlType(url);
+    const { source, id }: UrlItem = identifyUrlType(url);
     switch (source) {
     case null: return [];
     case UrlTypes.YouTubePlaylist:
@@ -49,7 +50,7 @@ async function processUrl(url: string): Promise<UrlItem[]> {
 
 // Retrieves top searches from a query on YouTube
 async function searchYouTube(query: string): Promise<YouTubeSearchResultItem[]> {
-    const url = `https://www.googleapis.com/youtube/v3/search?part=snippet&q=${encodeURIComponent(query)}&key=${ytApiId}&maxResults=5`;
+    const url: string = `https://www.googleapis.com/youtube/v3/search?part=snippet&q=${encodeURIComponent(query)}&key=${ytApiId}&maxResults=5`;
     try {
         const response = await axios.get<YouTubeSearchResponse>(url);
         return response.data.items;
@@ -60,4 +61,25 @@ async function searchYouTube(query: string): Promise<YouTubeSearchResultItem[]> 
     }
 }
 
-export { processUrl, searchYouTube };
+async function fetchYouTubeVideoDetails(videoId: string): Promise<Track> {
+    const url: string = `https://www.googleapis.com/youtube/v3/videos?id=${videoId}&key=${ytApiId}&part=snippet,contentDetails`;
+    const response = await axios.get<YoutubeVideoContentResponse>(url);
+
+    const videoItem: YouTubeVideoItem = response.data.items[0];
+    // not sure if this would be needed, as calling this function assumes we have an existing videoId
+    // if (!videoItem) {
+    //     throw new Error('Video not found!');
+    // }
+
+    const { snippet, contentDetails } = videoItem;
+    return {
+        title: snippet.title,
+        duration: contentDetails.duration,
+        link: `https://www.youtube.com/watch?v=${videoId}`,
+        thumbnail: snippet.thumbnails.high.url,
+        author: snippet.channelTitle,
+        source: `YouTube`,
+    } as Track;
+}
+
+export { processUrl, searchYouTube, fetchYouTubeVideoDetails };
