@@ -70,11 +70,15 @@ export interface YouTubeVideoItem {
     };
 }
 
+export enum Sources {
+    Youtube,
+}
+
 export interface Track {
     title: string;
     duration: string; // ISO 8601 duration format
-    link: string;
+    url: string;
     thumbnail: string;
     author: string;
-    source: string; // YouTube
+    source: Sources;
 }

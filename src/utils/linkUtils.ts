@@ -1,7 +1,7 @@
 import axios from 'axios';
 import { ytApiId } from '@config/config.json';
 import { UrlTypes, UrlItem, YouTubePlaylistItem, YouTubeSearchResultItem,
-    YouTubeSearchResponse, YoutubeVideoContentResponse, YouTubeVideoItem, Track } from '@typing';
+    YouTubeSearchResponse, YoutubeVideoContentResponse, YouTubeVideoItem, Track, Sources } from '@typing';
 
 // Regex list with all compatible platforms
 const sourceRegexList: Record<UrlTypes, RegExp> = {
@@ -70,16 +70,18 @@ async function fetchYouTubeVideoDetails(videoId: string): Promise<Track> {
     // if (!videoItem) {
     //     throw new Error('Video not found!');
     // }
+    const yturl = `https://www.youtube.com/watch?v=${videoId}`;
 
     const { snippet, contentDetails } = videoItem;
-    return {
+    const track: Track = {
         title: snippet.title,
         duration: contentDetails.duration,
-        link: `https://www.youtube.com/watch?v=${videoId}`,
+        url: yturl,
         thumbnail: snippet.thumbnails.high.url,
         author: snippet.channelTitle,
-        source: `YouTube`,
-    } as Track;
+        source: Sources.Youtube,
+    };
+    return track;
 }
 
 export { processUrl, searchYouTube, fetchYouTubeVideoDetails };

@@ -12,14 +12,16 @@ import {
 import { VoiceChannel } from 'discord.js';
 import { EventEmitter } from '@src/player/eventEmitter';
 import { Readable } from 'node:stream';
+import { GuildQueue } from './guildQueue';
+import { Track } from '@src/typing';
 
 export type VoiceEvents = {
     error: [error: Error];
     debug: [message: string];
-    start: [resource: AudioResource];
+    start: [resource: AudioResource<Track>];
     paused: [];
     resume: [],
-    finish: [resource: AudioResource];
+    finish: [resource: AudioResource<Track>];
     connDestroyed: [];
 }
 
@@ -28,14 +30,16 @@ export class StreamDispatcher extends EventEmitter<VoiceEvents> {
     public audioPlayer: AudioPlayer;
     public voiceChannel: VoiceChannel;
     public readonly connectionTimeout: number;
-    public audioResource?: AudioResource | null;
+    public audioResource?: AudioResource<Track> | null;
+    public queue?: GuildQueue | null;
 
-    constructor(connection: VoiceConnection, channel: VoiceChannel, audioPlayer?: AudioPlayer, connectionTimeout: number = 20000) {
+    constructor(connection: VoiceConnection, channel: VoiceChannel, queue: GuildQueue | null = null, audioPlayer?: AudioPlayer, connectionTimeout: number = 20000) {
         super();
 
         this.voiceConnection = connection;
         this.voiceChannel = channel;
         this.audioPlayer = audioPlayer || createAudioPlayer();
+        this.queue = queue;
 
         this.voiceConnection.on('debug', (message) => this.emit('debug', message));
         this.voiceConnection.on('error', (error) => this.emit('error', error));
@@ -101,11 +105,15 @@ export class StreamDispatcher extends EventEmitter<VoiceEvents> {
         if (this.voiceConnection.state.status !== VoiceConnectionStatus.Destroyed) this.voiceConnection.destroy();
     }
 
-    async createAudioResource(src: Readable) {
-        this.audioResource = createAudioResource(src);
+    createAudioResource(src: Readable, data: any): AudioResource<any> {
+        this.audioResource = createAudioResource(src, {
+            metadata: data,
+        });
+
+        return this.audioResource!;
     }
 
-    public async play(resource: AudioResource = this.audioResource!) {
+    public async play(resource: AudioResource<Track> = this.audioResource!) {
         if (!resource) {
             throw Error('No resource');
         }

@@ -36,14 +36,11 @@ const exportCommands = async (basePath: string) => {
 const deployCommands = async (commands: CommandObject[]) => {
     try {
         console.log(`Started refreshing ${commands.length} application (/) commands.`);
-
         // I guess if we want to do testing, we should add a guild id here to only deploy there
         const data: any = await rest.put(
             Routes.applicationCommands(clientId),
             { body: commands },
         );
-        console.log(data);
-
         console.log(`Successfully reloaded ${data.length} application (/) commands.`);
     }
     catch (error) {
@@ -51,23 +48,4 @@ const deployCommands = async (commands: CommandObject[]) => {
     }
 };
 
-const deployEvents = async (basePath: string) => {
-    const discordEventsFolder = path.join(basePath, 'events', 'discord');
-    const discordEvents = fs.readdirSync(discordEventsFolder).filter((file) => file.endsWith('.ts'));
-
-    for (const file of discordEvents) {
-        const filePath = path.join(discordEventsFolder, file);
-        const event = await require(filePath);
-        if (event.once) {
-            global.client.once(event.name, (...args) => event.execute(...args));
-        }
-        else {
-            global.client.on(event.name, (...args) => event.execute(...args));
-        }
-        console.log(`-> [Loaded Discord Event] ${file.split('.')[0]}`);
-    }
-
-    // in the future to do the player events as well
-};
-
-export { exportCommands, deployCommands, deployEvents };
+export { exportCommands, deployCommands };

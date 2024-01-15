@@ -1,11 +1,11 @@
 import { SlashCommandBuilder } from '@discordjs/builders';
-import { createVC } from '@utils/voice_utils';
+import { join } from '@utils/voiceUtils';
 import { StreamDispatcher } from '@src/player/streamDispatcher';
 import ytdl from 'ytdl-core';
 import { EmbedBuilder } from 'discord.js';
-import { processUrl, searchYouTube, fetchYouTubeVideoDetails } from '@src/utils/link_utils';
+import { processUrl, searchYouTube, fetchYouTubeVideoDetails } from '@src/utils/linkUtils';
 import { UrlItem, YouTubeSearchResultItem, Track } from '@src/typing';
-import { convertDuration } from '@src/utils/conversion_utils';
+import { convertDuration } from '@src/utils/conversionUtils';
 
 export = {
     data: new SlashCommandBuilder()
@@ -43,7 +43,7 @@ export = {
 
         if (!global.streamDispatcher) {
             if (interaction.member.voice.channel) {
-                global.streamDispatcher = new StreamDispatcher(createVC(interaction.member.voice.channel), interaction.member.voice.channel);
+                global.streamDispatcher = new StreamDispatcher(join(interaction.member.voice.channel), interaction.member.voice.channel);
             }
             else {
                 interaction.reply('You are not connected to a voice channel');
@@ -53,7 +53,7 @@ export = {
 
         const track: Track = await fetchYouTubeVideoDetails(requestedUrlItems[0].id!);
         const playEmbed: EmbedBuilder = new EmbedBuilder()
-            .setTitle(track.title).setURL(track.link)
+            .setTitle(track.title).setURL(track.url)
             .setAuthor({ name: track.author })
             .setThumbnail(track.thumbnail)
             .addFields(
@@ -62,7 +62,7 @@ export = {
             .setTimestamp()
             .setColor('#9867C5');
 
-        global.streamDispatcher.createAudioResource(ytdl(track.link, { filter: 'audioonly', highWaterMark: 1 << 25 }));
+        global.streamDispatcher.createAudioResource(ytdl(track.url, { filter: 'audioonly', highWaterMark: 1 << 25 }));
         global.streamDispatcher.play();
 
         await interaction.reply({
