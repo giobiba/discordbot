@@ -28,22 +28,6 @@ export class GuildQueue extends EventEmitter<GuildQueueEvents> {
         this.queuePlayer = new GuildQueuePlayer(this);
     }
 
-    public async connect(voiceChannel: VoiceChannel) {
-        let channel = this.player.client.channels.resolve(voiceChannel);
-        if (!channel || ! channel.isVoiceBased()) throw Error('Not a voice channel');
-
-        channel = channel as VoiceChannel;
-
-        if (this.dispatcher && channel.id !== this.dispatcher.voiceChannel.id) {
-            this.dispatcher.destroy();
-            this.dispatcher = null;
-        }
-
-        this.dispatcher = VoiceUtils.connect(channel, this);
-
-        this.attachListeners(this.dispatcher);
-    }
-
     private attachListeners(dispatcher: StreamDispatcher) {
         dispatcher.on('error', (e) => this.emit('error', this, e));
         dispatcher.on('debug', (m) => this.debug(m));
@@ -76,4 +60,33 @@ export class GuildQueue extends EventEmitter<GuildQueueEvents> {
         this.currentTrack = null;
     }
     /* eslint-enable @typescript-eslint/no-unused-vars */
+
+    public async connect(voiceChannel: VoiceChannel) {
+        let channel = this.player.client.channels.resolve(voiceChannel);
+        if (!channel || ! channel.isVoiceBased()) throw Error('Not a voice channel');
+
+        channel = channel as VoiceChannel;
+
+        if (this.dispatcher && channel.id !== this.dispatcher.voiceChannel.id) {
+            this.dispatcher.destroy();
+            this.dispatcher = null;
+        }
+
+        this.dispatcher = VoiceUtils.connect(channel, this);
+
+        this.attachListeners(this.dispatcher);
+    }
+
+    public async disconnect() {
+        this.dispatcher?.disconnect();
+    }
+
+    public isConnected() {
+        return this.dispatcher && !this.queuePlayer.isDestroyed() && !this.queuePlayer.isDisconnected();
+    }
+
+    get channelId() {
+        if (!this.isConnected()) return undefined;
+        return this.dispatcher!.voiceChannel.id;
+    }
 }

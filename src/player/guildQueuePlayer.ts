@@ -56,4 +56,11 @@ export class GuildQueuePlayer {
             return ytdl(track.url, { filter: 'audioonly', highWaterMark: 1 << 25 });
         }
     }
+
+    isDestroyed() {
+        return !!this.queue.dispatcher?.isDestroyed();
+    }
+    isDisconnected() {
+        return !!this.queue.dispatcher?.isDisconnected();
+    }
 }

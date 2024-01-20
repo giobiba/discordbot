@@ -1,4 +1,4 @@
-import { Collection, GuildResolvable } from 'discord.js';
+import { Collection } from 'discord.js';
 import { GuildQueue } from '@src/player/guildQueue';
 import { Player } from '@src/player/player';
 import { Snowflake } from 'discord-api-types/globals';
@@ -12,8 +12,8 @@ export class GuildQueueManager {
         this.player = player;
     }
 
-    public create(guildResolvable: GuildResolvable): GuildQueue {
-        const guild = this.player.client.guilds.resolve(guildResolvable);
+    public create(guildResolvable: Snowflake): GuildQueue {
+        const guild = this.player.client.guilds.cache.get(guildResolvable);
         if (!guild) throw Error('No guild');
 
         if (this.queues.has(guild.id)) {

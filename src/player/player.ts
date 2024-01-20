@@ -17,6 +17,7 @@ export class Player {
         if (!Player.instance) {
             Player.instance = new Player(client);
         }
+        return Player.instance;
     }
 
     public static getInstance(): Player {

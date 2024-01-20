@@ -4,7 +4,7 @@ import { Player } from '@src/player/player';
 
 import { token } from '@config/config.json';
 
-global.player = new Player(new Client({
+global.player = Player.create(new Client({
     intents: [
         GatewayIntentBits.Guilds, GatewayIntentBits.GuildVoiceStates,
     ],

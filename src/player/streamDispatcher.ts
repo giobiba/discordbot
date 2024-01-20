@@ -146,4 +146,16 @@ export class StreamDispatcher extends EventEmitter<VoiceEvents> {
     isIdle() {
         return this.audioPlayer.state.status === AudioPlayerStatus.Idle;
     }
+
+    isDestroyed() {
+        return this.voiceConnection.state.status === VoiceConnectionStatus.Destroyed;
+    }
+
+    isDisconnected() {
+        return this.voiceConnection.state.status === VoiceConnectionStatus.Disconnected;
+    }
+
+    get state() {
+        return this.audioPlayer.state.status;
+    }
 }
