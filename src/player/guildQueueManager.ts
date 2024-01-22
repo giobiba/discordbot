@@ -12,7 +12,7 @@ export class GuildQueueManager {
         this.player = player;
     }
 
-    public create(guildResolvable: Snowflake): GuildQueue {
+    public create(guildResolvable: Snowflake, commChannel: Snowflake): GuildQueue {
         const guild = this.player.client.guilds.cache.get(guildResolvable);
         if (!guild) throw Error('No guild');
 
@@ -20,7 +20,14 @@ export class GuildQueueManager {
             return this.queues.get(guild.id)!;
         }
 
-        const queue = new GuildQueue(this.player);
+        const queue = new GuildQueue(this.player, commChannel);
+
+        queue.on('error', (queue, error) => {
+            console.log(`Error for ${guild.id}: ${error.message}`);
+        });
+        queue.on('debug', (queue, message) => {
+            console.log(`Error for ${guild.id}: ${message}}`);
+        });
 
         this.queues.set(guild.id, queue);
 

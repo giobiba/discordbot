@@ -10,11 +10,9 @@ export = {
         const guildId = interaction.guildId;
         const player = Player.getInstance();
 
-        const guildQueue: GuildQueue = player.guildQueueManager.create(guildId);
+        const guildQueue: GuildQueue = player.guildQueueManager.create(guildId, interaction.channelId);
 
         if (interaction.member.voice.channel) {
-            console.log(interaction.member.voice.channelId);
-            console.log(guildQueue.channelId);
             if (!guildQueue.isConnected() || interaction.member.voice.channelId !== guildQueue.channelId) {
                 guildQueue.connect(interaction.member.voice.channel);
 

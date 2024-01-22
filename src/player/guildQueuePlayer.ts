@@ -10,12 +10,12 @@ export class GuildQueuePlayer {
         this.queue = queue;
     }
 
-    public async play(resource?: Track | null) {
+    public async play(resource: Track) {
         if (!this.queue.dispatcher) {
             throw Error('No connection');
         }
 
-        const track: Track = resource || this.queue.tracks.dequeue()!;
+        const track: Track = resource;
 
         if (!track) {
             this.queue.emit('error', this.queue, Error('No track found'));
@@ -25,12 +25,17 @@ export class GuildQueuePlayer {
 
         this.queue.dispatcher.createAudioResource(stream, track);
         this.queue.dispatcher.play();
+        this.queue.currentTrack = track;
     }
 
     // TODO:
     /* eslint-disable @typescript-eslint/no-unused-vars */
-    public skip(resource?: Track | null) {
+    public skip() {
+        if (!this.queue.dispatcher || !this.queue.currentTrack) return false;
 
+        this.queue.dispatcher.stop();
+
+        return true;
     }
     /* eslint-enable @typescript-eslint/no-unused-vars */
 

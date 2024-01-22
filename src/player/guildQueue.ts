@@ -2,11 +2,11 @@ import { Track } from '@typing';
 import { Queue } from '@src/player/queue';
 import { Player } from '@src/player/player';
 import { StreamDispatcher } from './streamDispatcher';
-import { VoiceChannel } from 'discord.js';
-import { AudioResource } from '@discordjs/voice';
+import { Snowflake, TextChannel, VoiceChannel } from 'discord.js';
 import { EventEmitter } from './eventEmitter';
 import * as VoiceUtils from '@src/utils/voiceUtils';
 import { GuildQueuePlayer } from './guildQueuePlayer';
+import { playingEmbed } from '@src/embeds/embeds';
 
 export type GuildQueueEvents = {
     error: [queue: GuildQueue, error: Error];
@@ -19,20 +19,22 @@ export class GuildQueue extends EventEmitter<GuildQueueEvents> {
     public player: Player;
     public queuePlayer: GuildQueuePlayer;
     public currentTrack: Track | null = null;
+    public commChannel: TextChannel;
 
-    public constructor(player: Player) {
+    public constructor(player: Player, commChannel: Snowflake) {
         super();
 
         this.tracks = new Queue<Track>();
         this.player = player;
         this.queuePlayer = new GuildQueuePlayer(this);
+        this.commChannel = this.player.client.channels.cache.get(commChannel) as TextChannel;
     }
 
     private attachListeners(dispatcher: StreamDispatcher) {
         dispatcher.on('error', (e) => this.emit('error', this, e));
         dispatcher.on('debug', (m) => this.debug(m));
-        dispatcher.on('finish', (resource) => this.performFinish(resource));
-        dispatcher.on('start', (resource) => this.performStart(resource));
+        dispatcher.on('finish', (track) => this.performFinish(track));
+        dispatcher.on('start', async (track) => await this.performStart(track));
         dispatcher.on('connDestroyed', () => {
             dispatcher.destroy();
             this.dispatcher = null;
@@ -45,19 +47,24 @@ export class GuildQueue extends EventEmitter<GuildQueueEvents> {
 
     // TODO: implement these functions
     /* eslint-disable @typescript-eslint/no-unused-vars */
-    private performStart(resource: AudioResource<Track>) {
-        this.currentTrack = resource.metadata;
+    private async performStart(track: Track) {
+        this.currentTrack = track;
+
+        console.log(`Now playing: ${track.title}`);
+        await this.commChannel.send({
+            embeds: [playingEmbed(track)],
+        });
     }
 
-    private performFinish(resource: AudioResource<Track>) {
+    private performFinish(prevTrack: Track) {
         if (!this.tracks.size()) {
-            // queue is empty
+            console.log(`Finished playing!`);
+            this.currentTrack = null;
             return;
         }
 
         const track: Track = this.tracks.dequeue()!;
         this.queuePlayer.play(track);
-        this.currentTrack = null;
     }
     /* eslint-enable @typescript-eslint/no-unused-vars */
 
@@ -83,6 +90,10 @@ export class GuildQueue extends EventEmitter<GuildQueueEvents> {
 
     public isConnected() {
         return this.dispatcher && !this.queuePlayer.isDestroyed() && !this.queuePlayer.isDisconnected();
+    }
+
+    public isEmpty() {
+        return this.tracks.size() === 0;
     }
 
     get channelId() {

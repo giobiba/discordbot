@@ -2,7 +2,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 
 import { REST, Routes } from 'discord.js';
-import { clientId, token } from '@config/config.json';
+import { clientId, guildId, token } from '@config/config.json';
 
 import { CommandObject } from '@typing';
 
@@ -38,7 +38,7 @@ const deployCommands = async (commands: CommandObject[]) => {
         console.log(`Started refreshing ${commands.length} application (/) commands.`);
         // I guess if we want to do testing, we should add a guild id here to only deploy there
         const data: any = await rest.put(
-            Routes.applicationCommands(clientId),
+            Routes.applicationGuildCommands(clientId, guildId),
             { body: commands },
         );
         console.log(`Successfully reloaded ${data.length} application (/) commands.`);

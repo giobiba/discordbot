@@ -18,10 +18,10 @@ import { Track } from '@src/typing';
 export type VoiceEvents = {
     error: [error: Error];
     debug: [message: string];
-    start: [resource: AudioResource<Track>];
+    start: [resource: Track];
     paused: [];
     resume: [],
-    finish: [resource: AudioResource<Track>];
+    finish: [resource: Track];
     connDestroyed: [];
 }
 
@@ -66,7 +66,7 @@ export class StreamDispatcher extends EventEmitter<VoiceEvents> {
                 }
             })
             .on(VoiceConnectionStatus.Destroyed, async () => {
-                this.audioPlayer.stop();
+                this.stop();
                 this.emit('connDestroyed');
             });
 
@@ -80,11 +80,11 @@ export class StreamDispatcher extends EventEmitter<VoiceEvents> {
             }
 
             if (newState.status === AudioPlayerStatus.Playing && (oldState.status === AudioPlayerStatus.Idle || oldState.status === AudioPlayerStatus.Buffering)) {
-                this.emit('start', this.audioResource!);
+                this.emit('start', this.audioResource!.metadata);
             }
 
             if (newState.status === AudioPlayerStatus.Idle && oldState.status !== AudioPlayerStatus.Idle) {
-                this.emit('finish', this.audioResource!);
+                this.emit('finish', this.audioResource!.metadata);
                 this.audioResource = null;
             }
         });
@@ -101,7 +101,7 @@ export class StreamDispatcher extends EventEmitter<VoiceEvents> {
     }
 
     disconnect() {
-        if (this.audioPlayer) this.audioPlayer.stop(true);
+        if (this.audioPlayer) this.stop(true);
         if (this.voiceConnection.state.status !== VoiceConnectionStatus.Destroyed) this.voiceConnection.destroy();
     }
 
@@ -115,7 +115,7 @@ export class StreamDispatcher extends EventEmitter<VoiceEvents> {
 
     public async play(resource: AudioResource<Track> = this.audioResource!) {
         if (!resource) {
-            throw Error('No resource');
+            this.emit('error', Error('No resource'));
         }
 
         if (!this.audioResource) this.audioResource = resource;
@@ -131,8 +131,8 @@ export class StreamDispatcher extends EventEmitter<VoiceEvents> {
         return this.audioPlayer.pause();
     }
 
-    stop() {
-        this.audioPlayer.stop();
+    stop(force: boolean = false) {
+        this.audioPlayer.stop(force);
     }
 
     resume() {

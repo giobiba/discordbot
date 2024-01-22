@@ -1,11 +1,9 @@
 import { SlashCommandBuilder } from '@discordjs/builders';
-import { join } from '@utils/voiceUtils';
-import { StreamDispatcher } from '@src/player/streamDispatcher';
-import ytdl from 'ytdl-core';
 import { EmbedBuilder } from 'discord.js';
 import { processUrl, searchYouTube, fetchYouTubeVideoDetails } from '@src/utils/linkUtils';
 import { UrlItem, YouTubeSearchResultItem, Track } from '@src/typing';
-import { convertDuration } from '@src/utils/conversionUtils';
+import { Player } from '@src/player/player';
+import { GuildQueue } from '@src/player/guildQueue';
 
 export = {
     data: new SlashCommandBuilder()
@@ -41,32 +39,28 @@ export = {
             return;
         }
 
-        if (!global.streamDispatcher) {
-            if (interaction.member.voice.channel) {
-                global.streamDispatcher = new StreamDispatcher(join(interaction.member.voice.channel), interaction.member.voice.channel);
+        const guildId = interaction.guildId;
+        const player = Player.getInstance();
+        const guildQueue: GuildQueue = player.guildQueueManager.create(guildId, interaction.channelId);
+
+        if (interaction.member.voice.channel) {
+            if (!guildQueue.isConnected() || interaction.member.voice.channelId !== guildQueue.channelId) {
+                guildQueue.connect(interaction.member.voice.channel);
             }
-            else {
-                interaction.reply('You are not connected to a voice channel');
-                return;
-            }
+        }
+        else {
+            await interaction.reply({ content: 'You are not connected to a voice channel!', ephemeral: true });
         }
 
         const track: Track = await fetchYouTubeVideoDetails(requestedUrlItems[0].id!);
-        const playEmbed: EmbedBuilder = new EmbedBuilder()
-            .setTitle(track.title).setURL(track.url)
-            .setAuthor({ name: track.author })
-            .setThumbnail(track.thumbnail)
-            .addFields(
-                { name: 'Duration', value: convertDuration(track.duration), inline: true },
-            )
-            .setTimestamp()
-            .setColor('#9867C5');
 
-        global.streamDispatcher.createAudioResource(ytdl(track.url, { filter: 'audioonly', highWaterMark: 1 << 25 }));
-        global.streamDispatcher.play();
+        if (!guildQueue.currentTrack && guildQueue.isEmpty()) {
+            guildQueue.queuePlayer.play(track);
+        }
+        else {
+            guildQueue.tracks.enqueue(track);
 
-        await interaction.reply({
-            embeds: [playEmbed],
-        });
+            await interaction.reply('Added to queue');
+        }
     },
 };

@@ -26,5 +26,4 @@ function disconnect(connection: VoiceConnection | StreamDispatcher ) {
     if (connection.state.status !== VoiceConnectionStatus.Destroyed) connection.destroy();
 }
 
-
 export { connect, join, disconnect };
