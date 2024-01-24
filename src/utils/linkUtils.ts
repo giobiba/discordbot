@@ -50,7 +50,7 @@ async function processUrl(url: string): Promise<UrlItem[]> {
 
 // Retrieves top searches from a query on YouTube
 async function searchYouTube(query: string): Promise<YouTubeSearchResultItem[]> {
-    const url: string = `https://www.googleapis.com/youtube/v3/search?part=snippet&q=${encodeURIComponent(query)}&key=${ytApiId}&maxResults=5`;
+    const url: string = `https://www.googleapis.com/youtube/v3/search?part=snippet&q=${encodeURIComponent(query)}&key=${ytApiId}&maxResults=5&type=video`;
     try {
         const response = await axios.get<YouTubeSearchResponse>(url);
         return response.data.items;

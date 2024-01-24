@@ -1,6 +1,7 @@
-import { Track } from '@src/typing';
+import { Track, YouTubeSearchResultItem } from '@src/typing';
 import { convertDuration } from '@src/utils/conversionUtils';
-import { EmbedBuilder } from 'discord.js';
+import { EmbedBuilder, ButtonBuilder, ButtonStyle, ActionRowBuilder } from 'discord.js';
+import { decode } from 'html-entities';
 
 function playingEmbed(track: Track) {
     const playEmbed: EmbedBuilder = new EmbedBuilder()
@@ -15,4 +16,28 @@ function playingEmbed(track: Track) {
     return playEmbed;
 }
 
-export { playingEmbed };
+function searchResultsEmbed(searchResultsOfQuery: YouTubeSearchResultItem[]) {
+    const searchResultsEmbed: EmbedBuilder = new EmbedBuilder()
+        .setColor('#9867C5')
+        .setTitle('Search Results:');
+
+    let counter = 1;
+    const results = searchResultsOfQuery.map((searchResult) => ({ name: '\u200B', value: decode(`${counter++}. ${searchResult.snippet.title}`) }));
+
+    counter = 1;
+    const buttons = searchResultsOfQuery.map((searchResult) => new ButtonBuilder()
+        .setCustomId(`${searchResult.id.videoId}`)
+        .setLabel(`Video ${counter++}`)
+        .setStyle(ButtonStyle.Secondary));
+
+    return {
+        embeds: [searchResultsEmbed.addFields(results)],
+        components: [new ActionRowBuilder().addComponents(buttons)],
+    };
+}
+
+function didNotRespond() {
+    return { content: 'You did not repond... 😔', embeds: [], components: [] };
+}
+
+export { playingEmbed, searchResultsEmbed, didNotRespond };
