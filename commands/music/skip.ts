@@ -4,8 +4,8 @@ import { Player } from '@src/player/player';
 
 export = {
     data: new SlashCommandBuilder()
-        .setName('leave')
-        .setDescription('Leave the current voice channel'),
+        .setName('skip')
+        .setDescription('Skip song'),
     async execute(interaction) {
         const player = Player.getInstance();
 
@@ -13,10 +13,13 @@ export = {
 
         if (!guildQueue || !guildQueue.isConnected()) {
             await interaction.reply({ content: 'Currently not in any channel.', ephemeral: true });
-            return;
         }
-
-        guildQueue.disconnect();
-        interaction.reply({ content: 'Disconnecting...' });
+        else if (!guildQueue.currentTrack) {
+            await interaction.reply({ content: 'No song playing', ephemeral: true });
+        }
+        else {
+            if (guildQueue.queuePlayer.skip()) await interaction.reply({ content: 'Skipped' });
+            else await interaction.reply({ content: 'Failed to skip' });
+        }
     },
 };

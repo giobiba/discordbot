@@ -1,4 +1,4 @@
-import { exportCommands, deployCommands } from '@utils/deploy_utils';
+import { exportCommands, deployCommands } from '@src/utils/deployUtils';
 import path from 'node:path';
 
 

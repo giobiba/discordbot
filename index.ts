@@ -1,16 +1,14 @@
-import { Client, GatewayIntentBits } from 'discord.js';
-import { createAudioPlayer } from '@discordjs/voice';
+import { Client } from '@utils/Client';
+import { GatewayIntentBits } from 'discord.js';
+import { Player } from '@src/player/player';
 
 import { token } from '@config/config.json';
 
-global.client = new Client({
+global.player = Player.create(new Client({
     intents: [
         GatewayIntentBits.Guilds, GatewayIntentBits.GuildVoiceStates,
     ],
-}),
-global.player = createAudioPlayer();
+}));
 
-// load the commands and events
-import '@src/loader';
-
-global.client.login(token);
+global.player.client.load(__dirname);
+global.player.client.login(token);

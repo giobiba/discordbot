@@ -26,6 +26,7 @@
 	  "@typescript-eslint/no-unused-vars": "error",
 	  "@typescript-eslint/no-explicit-any": "off",
 	  "brace-style": ["error", "stroustrup"],
-	  "no-tabs": "off"
+	  "no-tabs": "off",
+	  "@typescript-eslint/ban-ts-comment": "off"
 	}
 }

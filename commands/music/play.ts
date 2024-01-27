@@ -1,11 +1,9 @@
 import { SlashCommandBuilder } from '@discordjs/builders';
-import { getVoiceConnection } from '@discordjs/voice'; // , createAudioResource
-import { EmbedBuilder } from 'discord.js';
-import { joinVC } from '@utils/voice_utils';
-import { processUrl, searchYouTube, fetchYouTubeVideoDetails } from '@src/utils/link_utils';
-// import ytdl from 'ytdl-core';
+import { processUrl, searchYouTube, fetchYouTubeVideoDetails } from '@src/utils/linkUtils';
 import { UrlItem, YouTubeSearchResultItem, Track } from '@src/typing';
-import { convertDuration } from '@src/utils/conversion_utils';
+import { Player } from '@src/player/player';
+import { GuildQueue } from '@src/player/guildQueue';
+import { didNotRespond, searchResultsEmbed } from '@src/embeds/embeds';
 
 export = {
     data: new SlashCommandBuilder()
@@ -14,65 +12,56 @@ export = {
         .addStringOption((option) => option
             .setName('query')
             .setDescription('name of the song/search query')
-            .setRequired(false)),
+            .setRequired(true)),
     async execute(interaction) {
         const query: string = interaction.options.getString('query');
         const requestedUrlItems: UrlItem[] = await processUrl(query);
+
+        let videoId: string = '';
         if (requestedUrlItems.length === 0) {
             const searchResultsOfQuery: YouTubeSearchResultItem[] = await searchYouTube(query);
+
             if (searchResultsOfQuery.length === 0) {
-                interaction.reply('Youtube did not yield any search results. Try again!');
-                return;
-            }
-            const searchResultsEmbed: EmbedBuilder = new EmbedBuilder()
-                .setColor('#9867C5')
-                .setTitle('Search Results:');
-
-            let counter: number = 0;
-            for (const searchResult of searchResultsOfQuery) {
-                const title: string = searchResult.snippet.title;
-                counter++;
-                searchResultsEmbed.addFields({ name: '\u200B', value: `${counter}. ${title}` });
+                return interaction.reply('Youtube did not yield any search results. Try again!');
             }
 
-            await interaction.reply({
-                embeds: [searchResultsEmbed],
+            const response = await interaction.reply(searchResultsEmbed(searchResultsOfQuery));
+
+            await response.awaitMessageComponent({ time: 5_000 }).then((confirmation) => {
+                videoId = confirmation.customId;
+                response.delete();
+            }).catch(() => {
+                return interaction.editReply(didNotRespond()).then((msg) => {
+                    setTimeout(() => msg.delete(), 5_000);
+                }).catch();
             });
-            return;
+        }
+        else {
+            videoId = requestedUrlItems[0].id!;
         }
 
-        if (!getVoiceConnection(interaction.guild.id)) {
-            if (interaction.member.voice.channel) {
-                joinVC(interaction.member.voice.channel);
-            }
-            else {
-                interaction.reply('You are not connected to a voice channel');
-                return;
+        const guildId = interaction.guildId;
+        const player = Player.getInstance();
+        const guildQueue: GuildQueue = player.guildQueueManager.create(guildId, interaction.channelId);
+
+        if (interaction.member.voice.channel) {
+            if (!guildQueue.isConnected() || interaction.member.voice.channelId !== guildQueue.channelId) {
+                guildQueue.connect(interaction.member.voice.channel);
             }
         }
+        else {
+            await interaction.reply({ content: 'You are not connected to a voice channel!', ephemeral: true });
+        }
 
-        const track: Track = await fetchYouTubeVideoDetails(requestedUrlItems[0].id!);
-        const playEmbed: EmbedBuilder = new EmbedBuilder()
-            .setTitle(track.title).setURL(track.link)
-            .setAuthor({ name: track.author })
-            .setThumbnail(track.thumbnail)
-            .addFields(
-                { name: 'Duration', value: convertDuration(track.duration), inline: true },
-            )
-            .setTimestamp()
-            .setColor('#9867C5');
-        // let url = interaction.options.getString('query');
-        // if (!url) {
-        //     url = 'https://www.youtube.com/watch?v=BokbpfhV8O8';
-        // }
+        const track: Track = await fetchYouTubeVideoDetails(videoId);
 
-        // const stream = ytdl(url, { filter: 'audioonly', highWaterMark: 1 << 25 });
+        if (!guildQueue.currentTrack && guildQueue.isEmpty()) {
+            guildQueue.queuePlayer.play(track);
+        }
+        else {
+            guildQueue.tracks.enqueue(track);
 
-        // global.resource = createAudioResource(stream);
-        // global.player.play(global.resource);
-
-        await interaction.reply({
-            embeds: [playEmbed],
-        });
+            await interaction.reply('Added to queue');
+        }
     },
 };
