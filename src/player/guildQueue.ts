@@ -1,4 +1,4 @@
-import { Track } from '@typing';
+import { Track, Playlist, Playable } from '@typing';
 import { Queue } from '@src/player/queue';
 import { Player } from '@src/player/player';
 import { StreamDispatcher } from './streamDispatcher';
@@ -45,8 +45,7 @@ export class GuildQueue extends EventEmitter<GuildQueueEvents> {
         this.emit('debug', this, m);
     }
 
-    // TODO: implement these functions
-    /* eslint-disable @typescript-eslint/no-unused-vars */
+
     private async performStart(track: Track) {
         this.currentTrack = track;
 
@@ -57,18 +56,22 @@ export class GuildQueue extends EventEmitter<GuildQueueEvents> {
     }
 
     private performFinish(prevTrack: Track) {
+        this.currentTrack = null;
         if (!this.tracks.size()) {
             console.log(`Finished playing!`);
-            this.currentTrack = null;
             return;
         }
 
         const track: Track = this.tracks.dequeue()!;
         this.queuePlayer.play(track);
+        this.debug(`Finished playing: ${prevTrack.title}`);
     }
-    /* eslint-enable @typescript-eslint/no-unused-vars */
 
-    public async connect(voiceChannel: VoiceChannel) {
+    public skip() {
+        return this.queuePlayer.skip();
+    }
+
+    public connect(voiceChannel: VoiceChannel) {
         let channel = this.player.client.channels.resolve(voiceChannel);
         if (!channel || ! channel.isVoiceBased()) throw Error('Not a voice channel');
 
@@ -82,9 +85,10 @@ export class GuildQueue extends EventEmitter<GuildQueueEvents> {
         this.dispatcher = VoiceUtils.connect(channel, this);
 
         this.attachListeners(this.dispatcher);
+        return this;
     }
 
-    public async disconnect() {
+    public disconnect() {
         this.dispatcher?.disconnect();
     }
 
@@ -99,5 +103,25 @@ export class GuildQueue extends EventEmitter<GuildQueueEvents> {
     get channelId() {
         if (!this.isConnected()) return undefined;
         return this.dispatcher!.voiceChannel.id;
+    }
+
+    public async play(playable: Playable) {
+        let tracks: Track[] = [playable as Track];
+        if ((playable as Playlist).tracks) {
+            tracks = (playable as Playlist).tracks;
+        }
+
+        this.tracks.enqueue(tracks);
+
+        if (!this.currentTrack) {
+            this.queuePlayer.play();
+        }
+        else {
+            this.debug(`Added ${playable.title} queue`);
+        }
+    }
+
+    public listTracks(stratIndex: number, endIndex: number): string[] {
+        return this.tracks.map((t) => `${t.title} - ${t.author}`).slice(stratIndex, endIndex);
     }
 }

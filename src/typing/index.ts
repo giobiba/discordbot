@@ -7,30 +7,30 @@ export interface CommandObject {
 }
 
 export enum UrlTypes {
-    YouTube = 'yt_vid',
-    YouTubePlaylist = 'yt_list',
+    YouTubeVideo = 'youtube#video',
+    YouTubePlaylist = 'youtube#playlist',
+}
+
+export enum Sources {
+    Youtube = 'youtube',
 }
 
 // Interface to match <platform, id>
 export interface UrlItem {
-    source: UrlTypes | null;
-    id: string | null;
+    source: UrlTypes;
+    id: string;
 }
 
-export interface YouTubePlaylistItem {
-    snippet: {
-        // Other snippet details can be included here
-        resourceId: {
-            videoId: string; // The unique ID of the video
-        };
-    };
+export interface SearchItem extends UrlItem{
+    title?: string;
 }
 
 export interface YouTubeSearchResultItem {
     id: {
         kind: string;
-        videoId: string;
-    };
+        videoId: string | undefined;
+        playlistId: string | undefined;
+    }
     snippet: {
         publishedAt: string;
         channelId: string;
@@ -59,26 +59,82 @@ export interface YouTubeVideoItem {
     snippet: {
         title: string;
         thumbnails: {
-            high: {
+            [key: string]: {
                 url: string;
+                width: number;
+                height: number;
             };
         };
         channelTitle: string;
+        description: string;
     };
     contentDetails: {
         duration: string;
     };
 }
 
-export enum Sources {
-    Youtube,
+export interface YouTubePlaylist {
+    snippet: {
+        title: string;
+        thumbnails: {
+            [key: string]: {
+                url: string;
+                width: number;
+                height: number;
+            };
+        };
+        channelTitle: string;
+        description: string;
+    },
+    contentDetails: {
+        itemCount: number;
+    }
+}
+
+export interface YoutubePlaylistItems {
+    nextPageToken?: string
+    items: YoutubePlaylistItem[]
+}
+
+export interface YoutubePlaylistItem {
+    snippet: {
+        title: string;
+        thumbnails: {
+            [key: string]: {
+                url: string;
+                width: number;
+                height: number;
+            };
+        };
+        channelTitle: string;
+        description: string;
+        playlistId: string;
+    },
+    contentDetails: {
+        videoId: string;
+    }
 }
 
 export interface Track {
     title: string;
     duration: string; // ISO 8601 duration format
     url: string;
+    description: string;
     thumbnail: string;
     author: string;
     source: Sources;
+    playlistId?: string;
 }
+
+export interface Playlist {
+    tracks: Track[];
+    title: string;
+    url: string;
+    description: string;
+    thumbnail: string;
+    author: string;
+    source: Sources;
+    count: number
+}
+
+export type Playable = Track | Playlist;

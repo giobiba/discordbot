@@ -8,19 +8,18 @@ export = {
         .setDescription('Clear the bot queue and skip current song'),
     async execute(interaction) {
         const player = Player.getInstance();
-        const guildQueue: GuildQueue | null = player.guildQueueManager.get(interaction.guildId) || null;
+        const guildQueue: GuildQueue | null = player.guildQueueManager.get(interaction.guildId);
 
         if (!guildQueue || !guildQueue.isConnected()) {
-            await interaction.reply({ content: 'Currently not in any channel.', ephemeral: true });
+            return await interaction.reply({ content: 'Currently not in any channel.', ephemeral: true });
         }
-        else if (!guildQueue.currentTrack) {
-            guildQueue.tracks.clear();
 
+        guildQueue.tracks.clear();
+
+        if (!guildQueue.currentTrack) {
             await interaction.reply({ content: 'No song playing', ephemeral: true });
         }
         else {
-            guildQueue.tracks.clear();
-
             if (guildQueue.queuePlayer.skip()) await interaction.reply({ content: 'Stopped' });
             else await interaction.reply({ content: 'Failed to stop' });
         }

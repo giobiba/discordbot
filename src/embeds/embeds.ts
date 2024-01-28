@@ -1,7 +1,6 @@
-import { Track, YouTubeSearchResultItem } from '@src/typing';
+import { Track, SearchItem } from '@src/typing';
 import { convertDuration } from '@src/utils/conversionUtils';
 import { EmbedBuilder, ButtonBuilder, ButtonStyle, ActionRowBuilder } from 'discord.js';
-import { decode } from 'html-entities';
 
 function playingEmbed(track: Track) {
     const playEmbed: EmbedBuilder = new EmbedBuilder()
@@ -16,17 +15,17 @@ function playingEmbed(track: Track) {
     return playEmbed;
 }
 
-function searchResultsEmbed(searchResultsOfQuery: YouTubeSearchResultItem[]) {
+function searchResultsEmbed(searchResultsOfQuery: SearchItem[]) {
     const searchResultsEmbed: EmbedBuilder = new EmbedBuilder()
         .setColor('#9867C5')
         .setTitle('Search Results:');
 
     let counter = 1;
-    const results = searchResultsOfQuery.map((searchResult) => ({ name: '\u200B', value: decode(`${counter++}. ${searchResult.snippet.title}`) }));
+    const results = searchResultsOfQuery.map((searchResult) => ({ name: '\u200B', value: `${counter++}. ${searchResult.title}` }));
 
     counter = 1;
     const buttons = searchResultsOfQuery.map((searchResult) => new ButtonBuilder()
-        .setCustomId(`${searchResult.id.videoId}`)
+        .setCustomId(`${searchResult.id}`)
         .setLabel(`Video ${counter++}`)
         .setStyle(ButtonStyle.Secondary));
 

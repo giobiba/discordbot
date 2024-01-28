@@ -3,10 +3,10 @@ import { Player } from '@src/player/player';
 
 export = {
     data: new SlashCommandBuilder()
-        .setName('skip')
-        .setDescription('Skip song'),
+        .setName('pause')
+        .setDescription('Pause the currently playing song'),
     async execute(interaction) {
-        const player = Player.getInstance();
-        await player.handleSkip(interaction);
+        const player: Player = Player.getInstance();
+        await player.handlePause(interaction);
     },
 };
