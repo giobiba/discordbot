@@ -21,7 +21,7 @@ export interface UrlItem {
     id: string;
 }
 
-export interface SearchItem extends UrlItem{
+export interface SearchItem extends UrlItem {
     title?: string;
 }
 

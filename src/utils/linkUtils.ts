@@ -35,6 +35,7 @@ async function searchYouTube(query: string): Promise<SearchItem[]> {
             q: encodeURIComponent(query),
             part: 'snippet',
             type: 'video,playlist',
+            regionCode: 'RO',
         } });
 
         const items = response.data.items.map((item) => ({
@@ -51,7 +52,7 @@ async function searchYouTube(query: string): Promise<SearchItem[]> {
     }
 }
 
-async function fetchYouTube(searchItem: SearchItem): Promise<Playable> {
+async function fetchYouTube(searchItem: UrlItem): Promise<Playable> {
     switch (searchItem.source) {
     case UrlTypes.YouTubeVideo:
         return fetchYouTubeVideoDetails(searchItem);
@@ -61,7 +62,7 @@ async function fetchYouTube(searchItem: SearchItem): Promise<Playable> {
 }
 
 
-async function fetchYouTubeVideoDetails(searchItem: SearchItem): Promise<Track> {
+async function fetchYouTubeVideoDetails(searchItem: UrlItem): Promise<Track> {
     if (searchItem.source != UrlTypes.YouTubeVideo) throw Error('Not a youtube video');
 
     const url: string = 'https://www.googleapis.com/youtube/v3/videos';
@@ -89,7 +90,7 @@ async function fetchYouTubeVideoDetails(searchItem: SearchItem): Promise<Track> 
     } as Track;
 }
 
-async function fetchYoutubePlaylistItems(searchItem: SearchItem): Promise<Track[]> {
+async function fetchYoutubePlaylistItems(searchItem: UrlItem): Promise<Track[]> {
     let url: string = `https://www.googleapis.com/youtube/v3/playlistItems?playlistId=${searchItem.id}&key=${ytApiId}&part=snippet,contentDetails&maxResults=50`;
     let response = await axios.get<YoutubePlaylistItems>(url);
 
@@ -136,7 +137,7 @@ async function fetchYoutubePlaylistItems(searchItem: SearchItem): Promise<Track[
     return tracks;
 }
 
-async function fetchYouTubePlaylistDetails(searchItem: SearchItem): Promise<Playlist> {
+async function fetchYouTubePlaylistDetails(searchItem: UrlItem): Promise<Playlist> {
     if (searchItem.source != UrlTypes.YouTubePlaylist) throw Error('Not a youtube playlist');
 
     const url: string = `https://www.googleapis.com/youtube/v3/playlists?id=${searchItem.id}&key=${ytApiId}&part=snippet,contentDetails`;

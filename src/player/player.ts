@@ -34,7 +34,10 @@ export class Player {
     public async search(query: string, interaction): Promise<SearchItem | null> {
         let item: SearchItem | null = identifyUrlType(query);
 
-        if (item) return item;
+        if (item) {
+            interaction.deferReply();
+            return item;
+        }
 
         const searchResultsOfQuery: SearchItem[] = await searchYouTube(query);
 
@@ -46,15 +49,15 @@ export class Player {
         const response = await interaction.reply(searchResultsEmbed(searchResultsOfQuery));
 
         try {
-            const confirmation = await response.awaitMessageComponent({ time: 5_000 });
+            const confirmation = await response.awaitMessageComponent({ time: 15_000 });
 
             item = searchResultsOfQuery.find((el) => el.id == confirmation.customId)!;
-            await interaction.editReply({ content: `You chose ${item.title!}`, embeds: [], components: [] });
             return item;
         }
         catch (e) {
+            console.log(e);
             interaction.editReply(didNotRespond()).then((msg) => {
-                setTimeout(() => msg.delete(), 5_000);
+                setTimeout(() => msg.delete(), 3_000);
             }).catch();
             return null;
         }
@@ -68,8 +71,6 @@ export class Player {
         }
 
         const playable: Playable = await fetchYouTube(item);
-        if (guildQueue.currentTrack) await interaction.followUp({ content: `Added ${playable.title} to queue` });
-
         guildQueue.play(playable);
     }
 

@@ -118,6 +118,7 @@ export class GuildQueue extends EventEmitter<GuildQueueEvents> {
         }
         else {
             this.debug(`Added ${playable.title} queue`);
+            this.commChannel.send({ content: `Added ${playable.title} to queue` });
         }
     }
 

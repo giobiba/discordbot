@@ -18,5 +18,6 @@ export = {
         if (!item) return;
 
         player.play(item, interaction);
+        interaction.deleteReply();
     },
 };
