@@ -26,7 +26,7 @@ export class GuildQueueManager {
             console.log(`Error for ${guild.id}: ${error.message}`);
         });
         queue.on('debug', (queue, message) => {
-            console.log(`Error for ${guild.id}: ${message}}`);
+            console.log(`Debug message for ${guild.id}: ${message}}`);
         });
 
         this.queues.set(guild.id, queue);
@@ -34,8 +34,8 @@ export class GuildQueueManager {
         return queue;
     }
 
-    public get(id: Snowflake) {
-        return this.queues.get(id);
+    public get(id: Snowflake): GuildQueue | null {
+        return this.queues.get(id) || null;
     }
 
     public has(id: Snowflake) {

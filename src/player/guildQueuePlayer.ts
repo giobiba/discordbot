@@ -1,5 +1,5 @@
 import { GuildQueue } from '@src/player/guildQueue';
-import { Sources, Track } from '@src/typing';
+import { Track } from '@src/typing';
 import ytdl from 'ytdl-core';
 import { Readable } from 'node:stream';
 
@@ -10,12 +10,12 @@ export class GuildQueuePlayer {
         this.queue = queue;
     }
 
-    public async play(resource: Track) {
+    public async play(resource?: Track) {
         if (!this.queue.dispatcher) {
             throw Error('No connection');
         }
 
-        const track: Track = resource;
+        const track: Track = resource || this.queue.tracks.dequeue()!;
 
         if (!track) {
             this.queue.emit('error', this.queue, Error('No track found'));
@@ -28,23 +28,21 @@ export class GuildQueuePlayer {
         this.queue.currentTrack = track;
     }
 
-    // TODO:
-    /* eslint-disable @typescript-eslint/no-unused-vars */
     public skip() {
         if (!this.queue.dispatcher || !this.queue.currentTrack) return false;
 
         this.queue.dispatcher.stop();
+        this.queue.currentTrack = null;
 
         return true;
     }
-    /* eslint-enable @typescript-eslint/no-unused-vars */
 
     public pause() {
-        this.queue.dispatcher?.pause();
+        return this.queue.dispatcher?.pause();
     }
 
     public resume() {
-        this.queue.dispatcher?.resume();
+        return this.queue.dispatcher?.resume();
     }
 
     public stop(force: boolean) {
@@ -56,16 +54,22 @@ export class GuildQueuePlayer {
     }
 
     async generateStream(track: Track): Promise<Readable> {
-        switch (track.source) {
-        case Sources.Youtube:
-            return ytdl(track.url, { filter: 'audioonly', highWaterMark: 1 << 25 });
-        }
+        return ytdl(track.url, { filter: 'audioonly', highWaterMark: 1 << 25 });
     }
 
     isDestroyed() {
         return !!this.queue.dispatcher?.isDestroyed();
     }
+
     isDisconnected() {
         return !!this.queue.dispatcher?.isDisconnected();
+    }
+
+    isPlaying() {
+        return !!this.queue.dispatcher?.isPlaying();
+    }
+
+    isPaused() {
+        return !!this.queue.dispatcher?.isPaused();
     }
 }

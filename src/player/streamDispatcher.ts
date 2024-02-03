@@ -143,6 +143,10 @@ export class StreamDispatcher extends EventEmitter<VoiceEvents> {
         return this.audioPlayer.state.status === AudioPlayerStatus.Playing;
     }
 
+    isPaused() {
+        return this.audioPlayer.state.status === AudioPlayerStatus.Paused;
+    }
+
     isIdle() {
         return this.audioPlayer.state.status === AudioPlayerStatus.Idle;
     }
