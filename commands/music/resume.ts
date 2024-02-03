@@ -7,6 +7,8 @@ export = {
         .setDescription('Resume the currently playing song'),
     async execute(interaction) {
         const player: Player = Player.getInstance();
-        await player.handleResume(interaction);
+        player.handleResume(interaction).then((msg) => {
+            setTimeout(() => msg.delete(), 10_000);
+        }).catch();
     },
 };

@@ -1,4 +1,5 @@
 import { SlashCommandBuilder } from '@discordjs/builders';
+import { botNotConnected, disconnected } from '@src/embeds/embeds';
 import { Player } from '@src/player/player';
 
 export = {
@@ -10,10 +11,10 @@ export = {
         const guildQueue = player.guildQueueManager.get(interaction.guildId);
 
         if (!guildQueue || !guildQueue.isConnected()) {
-            return await interaction.reply({ content: 'Currently not in any channel.', ephemeral: true });
+            return await interaction.reply(botNotConnected(true));
         }
 
         guildQueue.disconnect();
-        interaction.reply({ content: 'Disconnecting...' });
+        await interaction.reply(disconnected());
     },
 };

@@ -6,7 +6,7 @@ import { Snowflake, TextChannel, VoiceChannel } from 'discord.js';
 import { EventEmitter } from './eventEmitter';
 import * as VoiceUtils from '@src/utils/voiceUtils';
 import { GuildQueuePlayer } from './guildQueuePlayer';
-import { playingEmbed } from '@src/embeds/embeds';
+import { addedToQueue, playingEmbed } from '@src/embeds/embeds';
 
 export type GuildQueueEvents = {
     error: [queue: GuildQueue, error: Error];
@@ -50,9 +50,7 @@ export class GuildQueue extends EventEmitter<GuildQueueEvents> {
         this.currentTrack = track;
 
         console.log(`Now playing: ${track.title}`);
-        await this.commChannel.send({
-            embeds: [playingEmbed(track)],
-        });
+        await this.commChannel.send(playingEmbed(track));
     }
 
     private performFinish(prevTrack: Track) {
@@ -71,7 +69,7 @@ export class GuildQueue extends EventEmitter<GuildQueueEvents> {
         return this.queuePlayer.skip();
     }
 
-    public connect(voiceChannel: VoiceChannel) {
+    public connect(voiceChannel: Snowflake) {
         let channel = this.player.client.channels.resolve(voiceChannel);
         if (!channel || ! channel.isVoiceBased()) throw Error('Not a voice channel');
 
@@ -118,7 +116,7 @@ export class GuildQueue extends EventEmitter<GuildQueueEvents> {
         }
         else {
             this.debug(`Added ${playable.title} queue`);
-            this.commChannel.send({ content: `Added ${playable.title} to queue` });
+            this.commChannel.send(addedToQueue(playable));
         }
     }
 

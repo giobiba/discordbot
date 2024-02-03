@@ -1,4 +1,5 @@
 import { SlashCommandBuilder } from '@discordjs/builders';
+import { memberNotConnected } from '@src/embeds/embeds';
 import { Player } from '@src/player/player';
 
 export = {
@@ -10,6 +11,12 @@ export = {
             .setDescription('Search query')
             .setRequired(true)),
     async execute(interaction) {
+        const vcId = interaction.member.voice.channelId;
+
+        if (!vcId) {
+            return await interaction.reply(memberNotConnected(true));
+        }
+
         const query: string = interaction.options.getString('query');
 
         const player: Player = Player.getInstance();

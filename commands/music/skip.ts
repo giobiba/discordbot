@@ -7,6 +7,8 @@ export = {
         .setDescription('Skip song'),
     async execute(interaction) {
         const player = Player.getInstance();
-        await player.handleSkip(interaction);
+        player.handleSkip(interaction).then((msg) => {
+            setTimeout(() => msg.delete(), 10_000);
+        }).catch();
     },
 };

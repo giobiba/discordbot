@@ -3,7 +3,7 @@ import { GuildQueueManager } from './guildQueueManager';
 import { Playable, SearchItem } from '@src/typing';
 import { GuildQueue } from './guildQueue';
 import { fetchYouTube, identifyUrlType, searchYouTube } from '@src/utils/linkUtils';
-import { didNotRespond, searchResultsEmbed } from '@src/embeds/embeds';
+import { alreadyPaused, notPaused, botNotConnected, didNotRespond, failedPause, failedResume, noSongPlaying, paused, resumed, searchResultsEmbed, skipped, skipFailed, stopped, stopFailed } from '@src/embeds/embeds';
 
 export class Player {
     public readonly client: Client;
@@ -64,10 +64,11 @@ export class Player {
     }
 
     public async play(item: SearchItem, interaction: any) {
+        const vcId = interaction.member.voice.channelId;
         const guildQueue: GuildQueue = this.guildQueueManager.create(interaction.guildId, interaction.channelId);
 
-        if (!guildQueue.isConnected() || interaction.member.voice.channel.id !== guildQueue.channelId) {
-            guildQueue.connect(interaction.member.voice.channel);
+        if (!guildQueue.isConnected() || vcId !== guildQueue.channelId) {
+            guildQueue.connect(vcId);
         }
 
         const playable: Playable = await fetchYouTube(item);
@@ -77,43 +78,67 @@ export class Player {
     public async handlePause(interaction: any) {
         const guildQueue: GuildQueue | null = this.guildQueueManager.get(interaction.guildId);
 
-        if (!guildQueue || !guildQueue.currentTrack) return interaction.reply({ content: 'Not playing a song' });
+        if (!guildQueue || !guildQueue.currentTrack) return interaction.reply(noSongPlaying(false));
 
         if (guildQueue.queuePlayer.isPlaying()) {
-            if (guildQueue.queuePlayer.pause()) return interaction.reply({ content: 'Paused' });
-            else return interaction.reply({ content: 'Failed to pause' });
+            if (guildQueue.queuePlayer.pause()) return interaction.reply(paused());
+            else return interaction.reply(failedPause());
         }
         else if (guildQueue.queuePlayer.isPaused()) {
-            return interaction.reply({ content: 'Already paused' });
+            return interaction.reply(alreadyPaused());
+        }
+        else {
+            guildQueue.debug('What the fuck');
         }
     }
 
     public async handleResume(interaction: any) {
         const guildQueue: GuildQueue | null = this.guildQueueManager.get(interaction.guildId);
 
-        if (!guildQueue || !guildQueue.currentTrack) return interaction.reply({ content: 'Not playing a song' });
+        if (!guildQueue || !guildQueue.currentTrack) return interaction.reply(noSongPlaying(false));
 
         if (guildQueue.queuePlayer.isPaused()) {
-            if (guildQueue.queuePlayer.resume()) return interaction.reply({ content: 'Resuming...' });
-            else return interaction.reply({ content: 'Failed to resume' });
+            if (guildQueue.queuePlayer.resume()) return interaction.reply(resumed());
+            else return interaction.reply(failedResume());
         }
         else if (guildQueue.queuePlayer.isPlaying()) {
-            return interaction.reply({ content: 'Not paused' });
+            return interaction.reply(notPaused());
+        }
+        else {
+            guildQueue.debug('What the fuck');
         }
     }
 
     public async handleSkip(interaction: any) {
         const guildQueue: GuildQueue | null = this.guildQueueManager.get(interaction.guildId);
 
-        if (!guildQueue || !guildQueue.isConnected()) return interaction.reply({ content: 'Currently not in any channel.', ephemeral: true });
+        if (!guildQueue || !guildQueue.isConnected()) return interaction.reply(botNotConnected(true));
 
-        if (!guildQueue.currentTrack) return interaction.reply({ content: 'No song playing' });
+        if (!guildQueue.currentTrack) return interaction.reply(noSongPlaying(false));
 
         if (guildQueue.skip()) {
-            return interaction.reply({ content: 'Skipped' });
+            return interaction.reply(skipped());
         }
         else {
-            return interaction.reply({ content: 'Failed to skip' });
+            return interaction.reply(skipFailed());
+        }
+    }
+
+    public async handleStop(interaction: any) {
+        const guildQueue: GuildQueue | null = this.guildQueueManager.get(interaction.guildId);
+
+        if (!guildQueue || !guildQueue.isConnected()) {
+            return interaction.reply(botNotConnected(true));
+        }
+
+        guildQueue.tracks.clear();
+
+        if (!guildQueue.currentTrack) {
+            return interaction.reply(noSongPlaying(false));
+        }
+        else {
+            if (guildQueue.queuePlayer.skip()) return interaction.reply(stopped());
+            else return interaction.reply(stopFailed());
         }
     }
 }

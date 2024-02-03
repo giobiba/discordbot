@@ -1,4 +1,5 @@
 import { SlashCommandBuilder } from '@discordjs/builders';
+import { alreadyConnected, memberNotConnected } from '@src/embeds/embeds';
 import { GuildQueue } from '@src/player/guildQueue';
 import { Player } from '@src/player/player';
 
@@ -7,8 +8,12 @@ export = {
         .setName('join')
         .setDescription('Join the voice channel of the requester.'),
     async execute(interaction) {
-        if (!interaction.member.voice.channel) {
-            return await interaction.reply({ content: 'You are not connected to a voice channel', ephemeral: true });
+        const vcId = interaction.member.voice.channelId;
+        await interaction.deferReply();
+
+        if (!vcId) {
+            await interaction.editReply(memberNotConnected(true));
+            return;
         }
 
         const guildId = interaction.guildId;
@@ -16,10 +21,12 @@ export = {
 
         const guildQueue: GuildQueue = player.guildQueueManager.create(guildId, interaction.channelId);
 
-        if (guildQueue.isConnected() && interaction.member.voice.channel.id === guildQueue.channelId) {
-            return await interaction.reply({ content: 'Already in your voice channel', ephemeral: true });
+        if (guildQueue.isConnected() && vcId === guildQueue.channelId) {
+            await interaction.editReply(alreadyConnected(true));
+            return;
         }
 
-        guildQueue.connect(interaction.member.voice.channel);
+        guildQueue.connect(vcId);
+        await interaction.deleteReply();
     },
 };

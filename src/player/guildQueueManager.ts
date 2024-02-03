@@ -23,10 +23,10 @@ export class GuildQueueManager {
         const queue = new GuildQueue(this.player, commChannel);
 
         queue.on('error', (queue, error) => {
-            console.log(`Error for ${guild.id}: ${error.message}`);
+            console.log(`Error for ${queue.channelId}: ${error.message}`);
         });
         queue.on('debug', (queue, message) => {
-            console.log(`Debug message for ${guild.id}: ${message}}`);
+            console.log(`Debug message for ${queue.channelId}: ${message}}`);
         });
 
         this.queues.set(guild.id, queue);

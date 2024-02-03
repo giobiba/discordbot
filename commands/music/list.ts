@@ -1,4 +1,5 @@
 import { SlashCommandBuilder } from '@discordjs/builders';
+import { botNotConnected } from '@src/embeds/embeds';
 import { Player } from '@src/player/player';
 
 export = {
@@ -10,7 +11,7 @@ export = {
         const guildQueue = player.guildQueueManager.get(interaction.guildId);
 
         if (!guildQueue) {
-            return await interaction.reply({ content: 'Not connected', ephemeral: true });
+            return await interaction.reply(botNotConnected(true));
         }
         else if (guildQueue?.isEmpty()) {
             return await interaction.reply({ content: 'No song in queue' });
