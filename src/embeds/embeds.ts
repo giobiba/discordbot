@@ -98,9 +98,9 @@ export function skipFailed() {
 }
 
 export function stopped() {
-    return { content: 'Skipped' };
+    return { content: 'Stopped' };
 }
 
 export function stopFailed() {
-    return { content: 'Failed to skip' };
+    return { content: 'Failed to stop' };
 }
