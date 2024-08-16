@@ -12,6 +12,7 @@ export = {
             .setRequired(true)),
     async execute(interaction) {
         const vcId = interaction.member.voice.channelId;
+        console.log('buna!');
 
         if (!vcId) {
             return await interaction.reply(memberNotConnected(true));
